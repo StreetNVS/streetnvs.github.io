@@ -6,11 +6,11 @@
  * =================================================================== */
 
 const NOVEL_SCENES = [
-  { id: "scene010", label: "Scene 010", note: "paper anchor (s10)" },
-  { id: "scene011", label: "Scene 011", note: "s11" },
-  { id: "scene002", label: "Scene 002", note: "s2" },
-  { id: "scene005", label: "Scene 005", note: "s5" },
-  { id: "scene015", label: "Scene 015", note: "s15" },
+  { id: "scene010", label: "Scene 010" },
+  { id: "scene011", label: "Scene 011" },
+  { id: "scene002", label: "Scene 002" },
+  { id: "scene005", label: "Scene 005" },
+  { id: "scene015", label: "Scene 015" },
 ];
 const NOVEL_TRAJ_ORDER = [
   { key: "elevate",    label: "Elevation"  },
@@ -21,18 +21,18 @@ const NOVEL_TRAJ_ORDER = [
 
 /* ---- §2 baselines ---- */
 const BASELINE_SCENES = [
-  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor"     },
-  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor"     },
-  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "extrapolation"    },
-  { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "extrapolation"    },
-  { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "extrapolation"    },
+  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "ratio 0.01" },
+  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "ratio 0.01" },
+  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "ratio 0.01" },
+  { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "ratio 0.1"  },
+  { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "ratio 0.1"  },
 ];
 
 /* ---- §4 ablation ---- */
 const ABLATION_SCENES = [
-  { id: "scene072_cam2", label: "Scene 072 · cam 2", note: "+4.16 PSNR vs. mean of variants" },
-  { id: "scene000_cam2", label: "Scene 000 · cam 2", note: "paper anchor" },
-  { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor" },
+  { id: "scene072_cam2", label: "Scene 072 · cam 2" },
+  { id: "scene000_cam2", label: "Scene 000 · cam 2" },
+  { id: "scene169_cam4", label: "Scene 169 · cam 4" },
 ];
 
 /* ---- sparsity (cam-0 trio first, then two side-camera cases) ---- */
@@ -146,7 +146,7 @@ function buildNovel() {
       card.style.setProperty("--swipe-pos",   "100%");
       card.style.setProperty("--swipe-right", "0%");
     }
-    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+    noteEl.textContent = curScene.note ? `${curScene.label} — ${curScene.note}` : curScene.label;
   }
 
   for (const [i, scene] of NOVEL_SCENES.entries()) {
@@ -162,7 +162,7 @@ function buildNovel() {
     sceneBtns.appendChild(b);
   }
 
-  noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+  noteEl.textContent = curScene.note ? `${curScene.label} — ${curScene.note}` : curScene.label;
 }
 
 /* =================================================================== */
@@ -279,7 +279,7 @@ function buildBaselines() {
     swapAndSeek(vBase, `${dir}/${curMethod}.mp4`, t);
     swapAndSeek(vOurs, `${dir}/ours.mp4`,  t);
     lblBase.textContent = BASELINE_METHODS.find((m) => m.key === curMethod).label;
-    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+    noteEl.textContent = curScene.note ? `${curScene.label} — ${curScene.note}` : curScene.label;
   }
 
   vOurs.addEventListener("timeupdate", () => {
@@ -353,7 +353,7 @@ function buildAblation() {
     swapAndSeek(vNoLid, `${dir}/no_lidar.mp4`, 0);
     swapAndSeek(vNoCam, `${dir}/no_cam.mp4`,   0);
     swapAndSeek(vNoRef, `${dir}/no_ref.mp4`,   0);
-    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+    noteEl.textContent = curScene.note ? `${curScene.label} — ${curScene.note}` : curScene.label;
   }
 
   vFull.addEventListener("timeupdate", () => {
