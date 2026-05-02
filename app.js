@@ -30,11 +30,9 @@ const BASELINE_SCENES = [
 
 /* ---- §4 ablation ---- */
 const ABLATION_SCENES = [
-  { id: "scene000_cam2", label: "Scene 000 · cam 2", note: "paper anchor"  },
-  { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor"  },
   { id: "scene072_cam2", label: "Scene 072 · cam 2", note: "+4.16 PSNR vs. mean of variants" },
-  { id: "scene057_cam3", label: "Scene 057 · cam 3", note: "+3.05 PSNR vs. mean of variants" },
-  { id: "scene032_cam4", label: "Scene 032 · cam 4", note: "+3.31 PSNR vs. mean of variants" },
+  { id: "scene000_cam2", label: "Scene 000 · cam 2", note: "paper anchor" },
+  { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor" },
 ];
 
 /* ---- sparsity (cam-0 trio first, then two side-camera cases) ---- */

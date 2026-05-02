@@ -42,12 +42,10 @@ SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encod
 NOVEL_SCENES   = ["s10", "s2", "s5", "s11", "s15"]
 TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
 ABLATION_SCENES = [
-    # (sample_id, scene_dir, note)
+    # (sample_id, scene_dir, note) — display order matches this list
+    ("waymo_000362_s72_c2",  "scene072_cam2", ""),
     ("waymo_000002_s0_c2",   "scene000_cam2", "anchor"),
     ("waymo_000849_s169_c4", "scene169_cam4", ""),
-    ("waymo_000362_s72_c2",  "scene072_cam2", ""),
-    ("waymo_000288_s57_c3",  "scene057_cam3", ""),
-    ("waymo_000164_s32_c4",  "scene032_cam4", ""),
 ]
 SPARSITY_SCENES = [
     # (scene_dir, sample_id) — ordered as the website should display them.
