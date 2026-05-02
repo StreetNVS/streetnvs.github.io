@@ -203,10 +203,19 @@ section.section {
 }
 .scene-block-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
+.scene-block-header h3 { flex: 1; }
+.block-toggle {
+  position: static !important;
+  font-size: 11px;
+  padding: 6px 12px;
+}
+.block-toggle .icon { font-size: 10px; }
 .scene-block-header h3 {
   margin: 0;
   font-size: 15px;

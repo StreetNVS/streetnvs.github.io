@@ -118,6 +118,34 @@ function makeStaticCard({ src, label, ours = false, lidar = false }) {
   return card;
 }
 
+/* Adds a Pause/Play pill to a .scene-block header that controls only the
+ * videos inside that block. Mirrors the section-level toggle behavior. */
+function attachBlockToggle(block) {
+  const header = block.querySelector(".scene-block-header");
+  if (!header) return;
+  const btn = document.createElement("button");
+  btn.className = "section-toggle block-toggle";
+  btn.dataset.state = "playing";
+  btn.setAttribute("aria-label", "Pause videos in this block");
+  btn.innerHTML = `<span class="icon">❚❚</span><span class="text">Pause</span>`;
+  btn.addEventListener("click", () => {
+    const playing = btn.dataset.state === "playing";
+    const videos = block.querySelectorAll("video");
+    if (playing) {
+      videos.forEach((v) => v.pause());
+      btn.dataset.state = "paused";
+      btn.querySelector(".text").textContent = "Play";
+      btn.querySelector(".icon").textContent = "▶";
+    } else {
+      videos.forEach((v) => v.play().catch(() => {}));
+      btn.dataset.state = "playing";
+      btn.querySelector(".text").textContent = "Pause";
+      btn.querySelector(".icon").textContent = "❚❚";
+    }
+  });
+  header.appendChild(btn);
+}
+
 /* =================================================================== */
 /* §1 — novel view                                                     */
 /* =================================================================== */
@@ -142,12 +170,13 @@ function buildNovel() {
         label:     traj.label,
       }));
     }
+    attachBlockToggle(block);
     root.appendChild(block);
   }
 }
 
 /* =================================================================== */
-/* §2 — baselines (2-3-3)                                              */
+/* §2 — baselines                                                      */
 /* =================================================================== */
 const BASELINE_METHODS = [
   { key: "freevs",  label: "FreeVS"         },
@@ -263,6 +292,7 @@ function buildAblation() {
     grid.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/ Camera Only" }));
     grid.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/ Projection Only" }));
     grid.appendChild(makeStaticCard({ src: `${dir}/no_ref.mp4`,   label: "Ours w/o Reference" }));
+    attachBlockToggle(block);
     root.appendChild(block);
   }
 }
