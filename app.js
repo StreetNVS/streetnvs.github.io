@@ -285,9 +285,37 @@ function buildSparsity() {
 }
 
 /* =================================================================== */
+/* Per-section play/pause toggle                                       */
+/* =================================================================== */
+function wireSectionToggles() {
+  document.querySelectorAll(".section-toggle").forEach((btn) => {
+    const section = btn.closest("section");
+    const text = btn.querySelector(".text");
+    const icon = btn.querySelector(".icon");
+    btn.addEventListener("click", () => {
+      const playing = btn.dataset.state === "playing";
+      const videos = section.querySelectorAll("video");
+      if (playing) {
+        videos.forEach((v) => v.pause());
+        btn.dataset.state = "paused";
+        text.textContent = "Play";
+        icon.textContent = "▶";
+        btn.setAttribute("aria-label", "Resume videos in this section");
+      } else {
+        videos.forEach((v) => v.play().catch(() => {}));
+        btn.dataset.state = "playing";
+        text.textContent = "Pause";
+        icon.textContent = "❚❚";
+        btn.setAttribute("aria-label", "Pause videos in this section");
+      }
+    });
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   buildNovel();
   buildBaselines();
   buildAblation();
   buildSparsity();
+  wireSectionToggles();
 });
