@@ -21,10 +21,12 @@ const NOVEL_TRAJ_ORDER = [
 
 /* ---- §2 baselines ---- */
 const BASELINE_SCENES = [
-  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor (s75_c2, ratio 0.01)"  },
-  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor (s76_c3, ratio 0.01)"  },
-  { id: "scene045_cam1", label: "Scene 045 · cam 1", note: "ratio 0.1 · gain +4.26 PSNR"        },
-  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "ratio 0.1 · gain +4.87 PSNR"        },
+  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor (s75_c2, ratio 0.01)" },
+  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor (s76_c3, ratio 0.01)" },
+  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "ratio 0.1 · gain +4.87 PSNR"       },
+  { id: "scene046_cam0", label: "Scene 046 · cam 0", note: "ratio 0.1 · gain +3.80 PSNR"       },
+  { id: "scene085_cam0", label: "Scene 085 · cam 0", note: "ratio 0.1 · gain +3.12 PSNR"       },
+  { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "ratio 0.1 · gain +2.70 PSNR"       },
 ];
 
 /* ---- §3 ablation ---- */
@@ -191,16 +193,16 @@ function buildAblation() {
         <h3>${scene.label}</h3>
         <span class="tag">${scene.note}</span>
       </div>
-      <div class="row row-2"></div>
-      <div class="row row-3"></div>
+      <div class="grid-2x3"></div>
     `;
-    const r1 = block.querySelector(".row-2");
-    const r2 = block.querySelector(".row-3");
-    r1.appendChild(makeStaticCard({ src: `${dir}/gt.mp4`,   label: "Ground Truth" }));
-    r1.appendChild(makeStaticCard({ src: `${dir}/full.mp4`, label: "StreetNVS Full", ours: true }));
-    r2.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/o LiDAR" }));
-    r2.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/o Camera" }));
-    r2.appendChild(makeStaticCard({ src: `${dir}/no_ref.mp4`,   label: "Ours w/o Reference" }));
+    const grid = block.querySelector(".grid-2x3");
+    // Top row: inputs + full result. Bottom row: three ablations.
+    grid.appendChild(makeStaticCard({ src: `${dir}/lidar.mp4`,    label: "LiDAR Input", lidar: true }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/gt.mp4`,       label: "Ground Truth" }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/full.mp4`,     label: "StreetNVS Full", ours: true }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/o LiDAR" }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/o Camera" }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/no_ref.mp4`,   label: "Ours w/o Reference" }));
     root.appendChild(block);
   }
 }
@@ -222,24 +224,32 @@ function buildSparsity() {
   // align the slider with the default ratio (0.1 is index 2 in RATIOS)
   slider.value = String(RATIOS.indexOf(curRatio));
 
+  // swap a video's source while preserving the current playback time, so the
+  // density toggle doesn't visually restart the clip.
+  function swapSrcKeepTime(video, newSrc) {
+    if (video.getAttribute("src") === newSrc) return;
+    const t = isFinite(video.currentTime) ? video.currentTime : 0;
+    const wasPaused = video.paused;
+    const resume = () => {
+      const dur = isFinite(video.duration) && video.duration > 0 ? video.duration : null;
+      video.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
+      if (!wasPaused) video.play().catch(() => {});
+    };
+    video.addEventListener("loadedmetadata", resume, { once: true });
+    video.src = newSrc;
+  }
+
   function applyState() {
     const dir = `assets/sparsity/${curScene}`;
-    // GT does not depend on ratio
+    // GT does not depend on ratio — only swap on scene change.
     if (vGT.dataset.scene !== curScene) {
       vGT.dataset.scene = curScene;
-      vGT.src = `${dir}/gt.mp4`;
-      vGT.play().catch(() => {});
+      swapSrcKeepTime(vGT, `${dir}/gt.mp4`);
     }
-    // ratio-dependent
-    const target = `${dir}/lidar/${curRatio}.mp4`;
-    if (vLid.getAttribute("src") !== target) {
-      vLid.src  = `${dir}/lidar/${curRatio}.mp4`;
-      vOurs.src = `${dir}/ours/${curRatio}.mp4`;
-      // try to keep them in sync
-      const t = 0;
-      const playBoth = () => { vLid.currentTime = t; vOurs.currentTime = t; vLid.play().catch(()=>{}); vOurs.play().catch(()=>{}); };
-      vLid.addEventListener("loadeddata", playBoth, { once: true });
-    }
+    // ratio-dependent panels: preserve currentTime across the toggle.
+    swapSrcKeepTime(vLid,  `${dir}/lidar/${curRatio}.mp4`);
+    swapSrcKeepTime(vOurs, `${dir}/ours/${curRatio}.mp4`);
+
     valLbl.textContent = curRatio;
     tickEls.forEach((el, i) => el.classList.toggle("active", RATIOS[i] === curRatio));
   }

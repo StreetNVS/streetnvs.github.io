@@ -322,9 +322,15 @@ section.section {
   .compare-block .row.row-3 { grid-template-columns: 1fr; }
 }
 
-/* ablation row-2 (just two videos) and row-3 (three ablations) */
-.ablation-block .row-2 { grid-template-columns: repeat(2, 1fr); max-width: 66.666%; margin-left: auto; margin-right: auto; }
-.ablation-block .row-3 { grid-template-columns: repeat(3, 1fr); }
+/* ablation: tighter 2x3 grid keeps each tile small */
+.ablation-block .grid-2x3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 700px) {
+  .ablation-block .grid-2x3 { grid-template-columns: repeat(2, 1fr); }
+}
 
 
 /* ---------- section 4 sparsity ---------- */

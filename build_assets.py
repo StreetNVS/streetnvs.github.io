@@ -48,8 +48,10 @@ SPARSITY_DIRS  = [
 ]
 PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01
 NEW_BASELINES   = [
-    ("waymo_000226_s45_c1", "scene045_cam1"),
     ("waymo_000453_s90_c3", "scene090_cam3"),
+    ("waymo_000230_s46_c0", "scene046_cam0"),
+    ("waymo_000425_s85_c0", "scene085_cam0"),
+    ("waymo_000645_s129_c0", "scene129_cam0"),
 ]
 
 
@@ -152,11 +154,19 @@ def main():
         "04_ours_no_ref.mp4":   "no_ref.mp4",
         "05_ours_full.mp4":     "full.mp4",
     }
+    abl_lidar_dir = PAPER / "addref_bettercam_0.01" / OURS_SUBDIR
+    abl_lidar_map = {
+        "scene000_cam2": "waymo_000002_s0_c2",
+        "scene169_cam4": "waymo_000849_s169_c4",
+    }
     for scene_dir in ABLATION_DIRS:
         src = SEL / "qual_ablation" / scene_dir
         dst = ASSETS / "ablation" / scene_dir
         for k, v in abl_map.items():
             install(src / k, dst / v, MODE)
+        sample_id = abl_lidar_map[scene_dir]
+        install(abl_lidar_dir / f"{sample_id}_cond.mp4",
+                dst / "lidar.mp4", MODE)
 
     # ---- §4 sparsity ----------------------------------------------------
     print("== sparsity ==")

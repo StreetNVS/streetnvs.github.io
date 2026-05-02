@@ -22,26 +22,17 @@
 
 <header class="hero">
   <h1>
-    <span class="grad">StreetNVS:</span><br />
-    Multi-Source Geometry Guidance for<br />
-    Street-View Novel View Generation
+    <span class="grad">Multi-Source Geometry Guidance for<br />
+    Street-View Novel View Generation</span>
   </h1>
   <p class="subtitle">
-    A unified framework for vehicle-based extreme novel-view synthesis that bridges
-    explicit 3D geometry and generative appearance priors. We use LiDAR-grounded
-    multi-modal correspondences as 3D anchors between reference and target views,
-    providing a geometric scaffold for a controllable video generation backbone.
-    Conditioning jointly on these sparse 3D anchors and relative camera poses,
-    StreetNVS preserves identity and structure even in unobserved regions—including
-    bird's-eye, lane-shifted, and rotated trajectories that depart sharply from the
-    original vehicle path.
+    Reconstruction-based methods interpolate well between observed views but
+    fail when target poses depart sharply from the vehicle trajectory; purely
+    generative methods produce plausible appearance without geometric
+    consistency. We bridge the two by using LiDAR-grounded 3D anchors and
+    relative camera poses to condition a controllable video generation
+    backbone, preserving identity and structure under extreme extrapolation.
   </p>
-  <div class="hero-meta">
-    <span class="pill accent">Geometry-grounded generation</span>
-    <span class="pill">Waymo Open Dataset</span>
-    <span class="pill">LiDAR + RGB + Camera Pose</span>
-    <span class="pill">Extreme novel-view extrapolation</span>
-  </div>
 </header>
 
 <!-- =============================================================== -->
@@ -156,7 +147,8 @@
 </section>
 
 <footer>
-  StreetNVS · paper-companion site · all videos auto-loop and are muted by default.
+  StreetNVS · paper-companion site · all videos auto-loop and are muted by default.<br />
+  Website designed by <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a>.
 </footer>
 
 <script src="app.js"></script>
