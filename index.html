@@ -76,11 +76,9 @@
     <div class="section-eyebrow">§2 · Comparison with baselines</div>
     <h2>Side-by-side against state-of-the-art</h2>
     <p>
-      Pick a scene and a baseline below; the four panels read left → right as
-      <em>LiDAR input · selected baseline · StreetNVS · ground truth</em>.
-      The first two scenes are the anchors used in the paper; the rest are
-      extrapolation cases where StreetNVS shows a clear margin over the
-      strongest LiDAR-aware comparison, <em>StreetCrafter*</em>.
+      Pick a scene and a baseline below to compare against StreetNVS at the
+      indicated LiDAR-sparsity ratio. The strongest LiDAR-aware comparison
+      is <em>StreetCrafter*</em>.
     </p>
   </div>
 
@@ -127,11 +125,9 @@
     <h2>How much LiDAR is enough?</h2>
     <p>
       Pick a scene and sweep the density slider between 0.1 % and 100 % of
-      the original LiDAR points. The four panels read left → right as
-      <em>LiDAR input · StreetCrafter* · StreetNVS · ground truth</em>.
-      Even at 0.1 % density, StreetNVS keeps structure and identity intact
-      while StreetCrafter* breaks down; the appearance sharpens gracefully
-      as more anchors come back.
+      the original LiDAR points. Even at 0.1 % density, StreetNVS keeps
+      structure and identity intact while StreetCrafter* breaks down; the
+      appearance sharpens gracefully as more anchors come back.
     </p>
   </div>
 
@@ -187,12 +183,10 @@
     <div class="section-eyebrow">§4 · Ablation study</div>
     <h2>Each conditioning signal carries weight</h2>
     <p>
-      Pick a scene and compare our full model against three reduced variants.
-      The top row reads <em>LiDAR input · ground truth · StreetNVS Full</em>;
-      the bottom row drops one conditioning signal at a time —
-      <em>w/ Camera Only</em> (no LiDAR scaffold), <em>w/ Projection Only</em>
-      (no relative camera pose), and <em>w/o Reference</em> (no source-view
-      anchor). Each removal degrades a different facet of consistency.
+      Pick a scene and compare our full model against three reduced variants:
+      <em>w/ Camera Only</em>, <em>w/ Projection Only</em>, and
+      <em>w/o Reference</em>. Each variant degrades a different facet of
+      consistency.
     </p>
   </div>
 
