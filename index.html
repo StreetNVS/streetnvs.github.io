@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StreetNVS — Multi-Source Geometry Guidance for Street-View Novel View Generation</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Street<span class="accent">NVS</span></div>
+    <div class="nav-links">
+      <a href="#novel">Novel View</a>
+      <a href="#baselines">vs. Baselines</a>
+      <a href="#ablation">Ablation</a>
+      <a href="#sparsity">LiDAR Sparsity</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>
+    <span class="grad">StreetNVS:</span><br />
+    Multi-Source Geometry Guidance for<br />
+    Street-View Novel View Generation
+  </h1>
+  <p class="subtitle">
+    A unified framework for vehicle-based extreme novel-view synthesis that bridges
+    explicit 3D geometry and generative appearance priors. We use LiDAR-grounded
+    multi-modal correspondences as 3D anchors between reference and target views,
+    providing a geometric scaffold for a controllable video generation backbone.
+    Conditioning jointly on these sparse 3D anchors and relative camera poses,
+    StreetNVS preserves identity and structure even in unobserved regions—including
+    bird's-eye, lane-shifted, and rotated trajectories that depart sharply from the
+    original vehicle path.
+  </p>
+  <div class="hero-meta">
+    <span class="pill accent">Geometry-grounded generation</span>
+    <span class="pill">Waymo Open Dataset</span>
+    <span class="pill">LiDAR + RGB + Camera Pose</span>
+    <span class="pill">Extreme novel-view extrapolation</span>
+  </div>
+</header>
+
+<!-- =============================================================== -->
+<!-- §1 Novel view synthesis -->
+<!-- =============================================================== -->
+<section id="novel" class="section">
+  <div class="section-head">
+    <div class="section-eyebrow">§1 · Unseen novel view synthesis</div>
+    <h2>Synthesizing trajectories far from the vehicle path</h2>
+    <p>
+      For each scene we render four camera trajectories that depart from the original
+      ego-trajectory: <em>Barron</em> (close to source), <em>Elevate</em> (BEV-like),
+      <em>Lane Shift</em> (sideways translation), and <em>Rotate</em> (yaw rotation).
+      Drag the slider on any clip to wipe between the synthesized RGB output (left)
+      and its underlying LiDAR conditioning (right).
+    </p>
+  </div>
+
+  <div id="novel-blocks"></div>
+</section>
+
+<!-- =============================================================== -->
+<!-- §2 Baseline comparison -->
+<!-- =============================================================== -->
+<section id="baselines" class="section">
+  <div class="section-head">
+    <div class="section-eyebrow">§2 · Comparison with baselines</div>
+    <h2>Side-by-side against state-of-the-art</h2>
+    <p>
+      Each block compares ground-truth and our LiDAR conditioning (top row) with
+      three camera-only baselines—<em>FreeVS</em>, <em>Gen3C</em>, <em>VACE</em>—and
+      three LiDAR-aware methods: <em>StreetCrafter</em>, <em>StreetCrafter*</em>
+      (an in-domain re-implementation), and <em>Ours</em>. The first two scenes are
+      the anchors used in the paper; the last two are extrapolation cases at
+      sparsity ratio 0.1 where StreetNVS shows the largest PSNR gain over
+      StreetCrafter*.
+    </p>
+  </div>
+
+  <div id="baseline-blocks"></div>
+</section>
+
+<!-- =============================================================== -->
+<!-- §3 Ablation -->
+<!-- =============================================================== -->
+<section id="ablation" class="section">
+  <div class="section-head">
+    <div class="section-eyebrow">§3 · Ablation study</div>
+    <h2>Each conditioning signal carries weight</h2>
+    <p>
+      Removing the LiDAR scaffold, the relative-camera-pose stream, or the reference
+      view each degrades a different aspect of consistency. Top row pairs the ground
+      truth with our full model; the bottom row shows the three ablations stripped
+      of one signal at a time.
+    </p>
+  </div>
+
+  <div id="ablation-blocks"></div>
+</section>
+
+<!-- =============================================================== -->
+<!-- §4 Sparsity demo -->
+<!-- =============================================================== -->
+<section id="sparsity" class="section">
+  <div class="section-head">
+    <div class="section-eyebrow">§4 · Demo on variable LiDAR sparsity</div>
+    <h2>How much LiDAR is enough?</h2>
+    <p>
+      Pick a scene and sweep the density slider between 0.1% and 100% of the
+      original LiDAR points. The middle panel shows what the model actually receives
+      as conditioning; the right panel is StreetNVS's output. Even at 0.1% density,
+      structure and identity hold up, while the appearance gradually sharpens as
+      more anchors come back.
+    </p>
+  </div>
+
+  <div class="sparsity-controls">
+    <label>Scene</label>
+    <div class="scene-buttons" id="sparsity-scene-buttons"></div>
+  </div>
+
+  <div class="sparsity-grid">
+    <div class="video-card">
+      <span class="label">Ground Truth</span>
+      <video id="spa-gt" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label lidar">LiDAR Input</span>
+      <video id="spa-lidar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label ours">StreetNVS</span>
+      <video id="spa-ours" autoplay loop muted playsinline></video>
+    </div>
+  </div>
+
+  <div class="density-slider">
+    <div class="header">
+      <span class="title">LiDAR Density</span>
+      <span class="value" id="spa-density-value">0.1</span>
+    </div>
+    <div class="track">
+      <input type="range" id="spa-density" min="0" max="3" step="1" value="2" />
+    </div>
+    <div class="ticks" id="spa-density-ticks">
+      <span data-i="0">0.001</span>
+      <span data-i="1">0.01</span>
+      <span data-i="2" class="active">0.1</span>
+      <span data-i="3">1</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  StreetNVS · paper-companion site · all videos auto-loop and are muted by default.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
