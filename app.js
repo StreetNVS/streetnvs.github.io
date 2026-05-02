@@ -24,7 +24,6 @@ const BASELINE_SCENES = [
   { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor"     },
   { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor"     },
   { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "extrapolation"    },
-  { id: "scene085_cam0", label: "Scene 085 · cam 0", note: "extrapolation"    },
   { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "extrapolation"    },
   { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "extrapolation"    },
 ];
@@ -137,12 +136,12 @@ function buildNovel() {
     return { traj, top: c.top, bottom: c.bottom };
   });
 
+  // Scene change always resets to t=0; pause state is preserved by swapAndSeek.
   function applyState() {
     for (const { traj, top, bottom } of cards) {
       const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
-      const t = isFinite(top.currentTime) ? top.currentTime : 0;
-      swapAndSeek(top,    `${dir}/gen.mp4`,  t);
-      swapAndSeek(bottom, `${dir}/cond.mp4`, t);
+      swapAndSeek(top,    `${dir}/gen.mp4`,  0);
+      swapAndSeek(bottom, `${dir}/cond.mp4`, 0);
     }
     noteEl.textContent = `${curScene.label} — ${curScene.note}`;
   }
@@ -267,9 +266,11 @@ function buildBaselines() {
   const FOLLOWERS = [vGT, vLid, vBase];
   const SYNC_TOL  = 0.15;
 
-  function applyState() {
+  // resetTime=true when the scene changes, so all four panels restart from 0;
+  // false when only the baseline method changes, so we keep the timeline.
+  function applyState({ resetTime = false } = {}) {
     const dir = `assets/baselines/${curScene.id}`;
-    const t = isFinite(vOurs.currentTime) ? vOurs.currentTime : 0;
+    const t = resetTime ? 0 : (isFinite(vOurs.currentTime) ? vOurs.currentTime : 0);
     swapAndSeek(vGT,   `${dir}/gt.mp4`,    t);
     swapAndSeek(vLid,  `${dir}/lidar.mp4`, t);
     swapAndSeek(vBase, `${dir}/${curMethod}.mp4`, t);
@@ -298,7 +299,7 @@ function buildBaselines() {
       [...sceneBtns.children].forEach((c) => c.classList.remove("active"));
       b.classList.add("active");
       curScene = scene;
-      applyState();
+      applyState({ resetTime: true });
     });
     sceneBtns.appendChild(b);
   }
@@ -312,7 +313,7 @@ function buildBaselines() {
       [...methodBtns.children].forEach((c) => c.classList.remove("active"));
       b.classList.add("active");
       curMethod = m.key;
-      applyState();
+      applyState();              // method swap keeps the timeline
     });
     methodBtns.appendChild(b);
   }
@@ -340,15 +341,15 @@ function buildAblation() {
   const FOLLOWERS = [vLid, vGT, vNoLid, vNoCam, vNoRef];
   const SYNC_TOL  = 0.15;
 
+  // §4 only has a scene selector → every applyState resets to t=0.
   function applyState() {
     const dir = `assets/ablation/${curScene.id}`;
-    const t = isFinite(vFull.currentTime) ? vFull.currentTime : 0;
-    swapAndSeek(vLid,   `${dir}/lidar.mp4`,    t);
-    swapAndSeek(vGT,    `${dir}/gt.mp4`,       t);
-    swapAndSeek(vFull,  `${dir}/full.mp4`,     t);
-    swapAndSeek(vNoLid, `${dir}/no_lidar.mp4`, t);
-    swapAndSeek(vNoCam, `${dir}/no_cam.mp4`,   t);
-    swapAndSeek(vNoRef, `${dir}/no_ref.mp4`,   t);
+    swapAndSeek(vLid,   `${dir}/lidar.mp4`,    0);
+    swapAndSeek(vGT,    `${dir}/gt.mp4`,       0);
+    swapAndSeek(vFull,  `${dir}/full.mp4`,     0);
+    swapAndSeek(vNoLid, `${dir}/no_lidar.mp4`, 0);
+    swapAndSeek(vNoCam, `${dir}/no_cam.mp4`,   0);
+    swapAndSeek(vNoRef, `${dir}/no_ref.mp4`,   0);
     noteEl.textContent = `${curScene.label} — ${curScene.note}`;
   }
 
@@ -402,20 +403,19 @@ function buildSparsity() {
   const FOLLOWERS = [vGT, vLid, vSCS];
   const SYNC_TOL  = 0.15;   // seconds — drift threshold before we resync
 
-  function applyState() {
+  // resetTime=true on scene change → all four panels restart from 0;
+  // false on density-slider change → keep the current timeline.
+  function applyState({ resetTime = false } = {}) {
     const dir = `assets/sparsity/${curScene}`;
-    // Capture master time *once* and replay every panel from the same offset.
-    const t = isFinite(vOurs.currentTime) ? vOurs.currentTime : 0;
+    const t = resetTime ? 0 : (isFinite(vOurs.currentTime) ? vOurs.currentTime : 0);
 
-    // GT only depends on scene, but if scene changed we still want it on the
-    // master clock; if scene didn't change, the timeupdate sync below covers it.
     if (vGT.dataset.scene !== curScene) {
       vGT.dataset.scene = curScene;
       swapAndSeek(vGT, `${dir}/gt.mp4`, t);
     }
-    swapAndSeek(vLid,  `${dir}/lidar/${curRatio}.mp4`,    t);
-    swapAndSeek(vSCS,  `${dir}/sc_star/${curRatio}.mp4`,  t);
-    swapAndSeek(vOurs, `${dir}/ours/${curRatio}.mp4`,     t);
+    swapAndSeek(vLid,  `${dir}/lidar/${curRatio}.mp4`,   t);
+    swapAndSeek(vSCS,  `${dir}/sc_star/${curRatio}.mp4`, t);
+    swapAndSeek(vOurs, `${dir}/ours/${curRatio}.mp4`,    t);
 
     valLbl.textContent = curRatio;
     tickEls.forEach((el, i) => el.classList.toggle("active", RATIOS[i] === curRatio));
@@ -445,17 +445,16 @@ function buildSparsity() {
       [...buttons.children].forEach((c) => c.classList.remove("active"));
       b.classList.add("active");
       curScene = scene.id;
-      applyState();
+      applyState({ resetTime: true });        // scene change → restart from 0
     });
     buttons.appendChild(b);
   }
 
-  // ratio slider
+  // ratio slider — keeps the current timeline
   slider.addEventListener("input", () => {
     curRatio = RATIOS[+slider.value];
     applyState();
   });
-  // tick clicks
   tickEls.forEach((el) => el.addEventListener("click", () => {
     slider.value = el.dataset.i;
     curRatio = RATIOS[+el.dataset.i];

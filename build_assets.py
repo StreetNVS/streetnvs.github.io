@@ -62,7 +62,6 @@ PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01
 NEW_BASELINES   = [
     # (sample_id, scene_dir, ratio)
     ("waymo_000453_s90_c3",  "scene090_cam3", "0.01"),
-    ("waymo_000425_s85_c0",  "scene085_cam0", "0.01"),
     ("waymo_000630_s126_c0", "scene126_cam0", "0.1"),
     ("waymo_000645_s129_c0", "scene129_cam0", "0.1"),
 ]
