@@ -226,19 +226,26 @@ function _hideOverlay(v) {
 
 // Swap a video's src, restore play-time, honor the section pause state,
 // and overlay the previous frame so the black flash is hidden.
+//
+// Sets v.dataset.swapping while the swap is in flight; the per-section
+// master-clock listeners skip their work whenever the master has that tag,
+// so followers are not yanked to currentTime=0 while the new src loads.
 function swapAndSeek(v, newSrc, t) {
   if (v.getAttribute("src") === newSrc) return;
   const sectionEl = v.closest("section");
+  v.dataset.swapping = "1";
   _showLastFrame(v);
   v.addEventListener("loadedmetadata", () => {
     seekTo(v, t);
+    delete v.dataset.swapping;
     if (sectionPaused(sectionEl)) v.pause();
     else v.play().catch(() => {});
   }, { once: true });
-  // First decoded frame of the new clip → safe to drop the overlay.
   v.addEventListener("loadeddata", () => _hideOverlay(v), { once: true });
-  // Safety net: don't leave the overlay up indefinitely if events misfire.
-  setTimeout(() => _hideOverlay(v), 1500);
+  setTimeout(() => {
+    _hideOverlay(v);
+    delete v.dataset.swapping;          // clear even if loadedmetadata never fires
+  }, 1500);
   v.src = newSrc;
 }
 
@@ -283,9 +290,11 @@ function buildBaselines() {
   }
 
   vOurs.addEventListener("timeupdate", () => {
+    if (vOurs.dataset.swapping) return;          // master mid-swap — don't drag followers to 0
     const t = vOurs.currentTime;
     if (!isFinite(t)) return;
     for (const v of FOLLOWERS) {
+      if (v.dataset.swapping) continue;
       if (!isFinite(v.duration) || v.duration <= 0) continue;
       if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
     }
@@ -355,9 +364,11 @@ function buildAblation() {
   }
 
   vFull.addEventListener("timeupdate", () => {
+    if (vFull.dataset.swapping) return;
     const t = vFull.currentTime;
     if (!isFinite(t)) return;
     for (const v of FOLLOWERS) {
+      if (v.dataset.swapping) continue;
       if (!isFinite(v.duration) || v.duration <= 0) continue;
       if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
     }
@@ -425,9 +436,11 @@ function buildSparsity() {
   // (fires ~4×/s during playback) handles loop boundaries cleanly: when the
   // master loops to 0, the followers exceed SYNC_TOL and snap back too.
   vOurs.addEventListener("timeupdate", () => {
+    if (vOurs.dataset.swapping) return;
     const t = vOurs.currentTime;
     if (!isFinite(t)) return;
     for (const v of FOLLOWERS) {
+      if (v.dataset.swapping) continue;
       if (!isFinite(v.duration) || v.duration <= 0) continue;
       if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
     }
