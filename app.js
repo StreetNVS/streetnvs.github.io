@@ -7,9 +7,9 @@
 
 const NOVEL_SCENES = [
   { id: "scene010", label: "Scene 010", note: "paper anchor (s10)" },
+  { id: "scene011", label: "Scene 011", note: "s11" },
   { id: "scene002", label: "Scene 002", note: "s2" },
   { id: "scene005", label: "Scene 005", note: "s5" },
-  { id: "scene011", label: "Scene 011", note: "s11" },
   { id: "scene015", label: "Scene 015", note: "s15" },
 ];
 const NOVEL_TRAJ_ORDER = [

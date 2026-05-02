@@ -61,10 +61,11 @@ SPARSITY_SCENES = [
 SPARSITY_RATIOS = ["0.001", "0.01", "0.1", "1"]
 PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01
 NEW_BASELINES   = [
-    ("waymo_000453_s90_c3",  "scene090_cam3"),
-    ("waymo_000425_s85_c0",  "scene085_cam0"),
-    ("waymo_000630_s126_c0", "scene126_cam0"),
-    ("waymo_000645_s129_c0", "scene129_cam0"),
+    # (sample_id, scene_dir, ratio)
+    ("waymo_000453_s90_c3",  "scene090_cam3", "0.01"),
+    ("waymo_000425_s85_c0",  "scene085_cam0", "0.01"),
+    ("waymo_000630_s126_c0", "scene126_cam0", "0.1"),
+    ("waymo_000645_s129_c0", "scene129_cam0", "0.1"),
 ]
 
 
@@ -140,22 +141,29 @@ def main():
         for k, v in paper_pick_map.items():
             install(src / k, dst / v, MODE)
 
-    base01 = PAPER / "addref_bettercam_0.1" / OURS_SUBDIR
-    for sample_id, scene_dir in NEW_BASELINES:
+    # Per-ratio source-dir resolvers (StreetCrafter at 0.01 is a flat dir;
+    # StreetCrafter* at 0.01 lives in *_0.01_temp without an inner subdir).
+    def ours_dir(r):    return PAPER / f"addref_bettercam_{r}" / OURS_SUBDIR
+    def sc_dir(r):      return PAPER / f"streetcrafter_{r}"
+    def sc_star_dir(r): return (PAPER / "streetcrafter_star_0.01_temp"
+                                if r == "0.01"
+                                else PAPER / f"streetcrafter_star_{r}" / SC_STAR_SUB)
+
+    for sample_id, scene_dir, ratio in NEW_BASELINES:
         dst = ASSETS / "baselines" / scene_dir
-        install(base01 / f"{sample_id}_gt.mp4",        dst / "gt.mp4",     MODE)
-        install(base01 / f"{sample_id}_cond.mp4",      dst / "lidar.mp4",  MODE)
-        install(base01 / f"{sample_id}_generated.mp4", dst / "ours.mp4",   MODE)
+        od  = ours_dir(ratio)
+        install(od / f"{sample_id}_gt.mp4",        dst / "gt.mp4",    MODE)
+        install(od / f"{sample_id}_cond.mp4",      dst / "lidar.mp4", MODE)
+        install(od / f"{sample_id}_generated.mp4", dst / "ours.mp4",  MODE)
         install(PAPER / "eval_freevs" / f"{sample_id}_generated.mp4",
                 dst / "freevs.mp4", MODE)
         install(PAPER / "eval_gen3c"  / f"{sample_id}_generated.mp4",
                 dst / "gen3c.mp4",  MODE)
         install(PAPER / "eval_vace"   / f"{sample_id}_generated.mp4",
                 dst / "vace.mp4",   MODE)
-        install(PAPER / "streetcrafter_0.1" / f"{sample_id}_generated.mp4",
+        install(sc_dir(ratio)      / f"{sample_id}_generated.mp4",
                 dst / "sc.mp4",     MODE)
-        install(PAPER / "streetcrafter_star_0.1" / SC_STAR_SUB
-                      / f"{sample_id}_generated.mp4",
+        install(sc_star_dir(ratio) / f"{sample_id}_generated.mp4",
                 dst / "sc_star.mp4", MODE)
 
     # ---- §3 ablation ----------------------------------------------------
@@ -196,7 +204,9 @@ def main():
     }
     for scene_dir, sample_id in SPARSITY_SCENES:
         dst = ASSETS / "sparsity" / scene_dir
-        install(base01 / f"{sample_id}_gt.mp4", dst / "gt.mp4", MODE)
+        # GT is identical across ratios; pull it from any one (use 0.1).
+        install(OURS_RATIO_DIRS["0.1"] / f"{sample_id}_gt.mp4",
+                dst / "gt.mp4", MODE)
         for ratio in SPARSITY_RATIOS:
             ours_dir = OURS_RATIO_DIRS[ratio]
             scs_dir  = SC_STAR_RATIO_DIRS[ratio]
