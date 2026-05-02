@@ -355,15 +355,17 @@ section.section {
 .video-card.swipe .swipe-side.right { right: 8px; color: #fff; }
 
 
-/* ---------- section 1 layout: 4 trajectory tiles in one row ---------- */
+/* ---------- section 1 layout: 2×2 trajectory tiles, sized to match §4 ---------- */
 .novel-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
+  max-width: 780px;       /* 2 × 385 + 10 gap → tile matches §4 grid-2x3 tile */
 }
-@media (max-width: 1100px) { .novel-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px)  { .novel-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .novel-grid { grid-template-columns: 1fr; max-width: none; }
+}
 
 /* ---------- section 2/3 layout: 2-3-3 grid ---------- */
 .compare-block .row {
