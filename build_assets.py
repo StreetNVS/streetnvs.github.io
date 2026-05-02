@@ -41,7 +41,14 @@ SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encod
 
 NOVEL_SCENES   = ["s10", "s2", "s5", "s11", "s15"]
 TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
-ABLATION_DIRS  = ["scene000_cam2", "scene169_cam4"]
+ABLATION_SCENES = [
+    # (sample_id, scene_dir, note)
+    ("waymo_000002_s0_c2",   "scene000_cam2", "anchor"),
+    ("waymo_000849_s169_c4", "scene169_cam4", ""),
+    ("waymo_000362_s72_c2",  "scene072_cam2", ""),
+    ("waymo_000288_s57_c3",  "scene057_cam3", ""),
+    ("waymo_000164_s32_c4",  "scene032_cam4", ""),
+]
 SPARSITY_SCENES = [
     # (scene_dir, sample_id) — ordered as the website should display them.
     ("scene162_cam0", "waymo_000810_s162_c0"),
@@ -158,28 +165,25 @@ def main():
         install(sc_star_dir(ratio) / f"{sample_id}_generated.mp4",
                 dst / "sc_star.mp4", MODE)
 
-    # ---- §3 ablation ----------------------------------------------------
+    # ---- §4 ablation ----------------------------------------------------
+    # Source every ablation variant directly from paper_ready (so new scenes
+    # don't have to be pre-staged into selected_videos).
     print("== ablation ==")
-    abl_map = {
-        "01_gt.mp4":            "gt.mp4",
-        "02_ours_no_lidar.mp4": "no_lidar.mp4",
-        "03_ours_no_cam.mp4":   "no_cam.mp4",
-        "04_ours_no_ref.mp4":   "no_ref.mp4",
-        "05_ours_full.mp4":     "full.mp4",
-    }
-    abl_lidar_dir = PAPER / "addref_bettercam_0.01" / OURS_SUBDIR
-    abl_lidar_map = {
-        "scene000_cam2": "waymo_000002_s0_c2",
-        "scene169_cam4": "waymo_000849_s169_c4",
-    }
-    for scene_dir in ABLATION_DIRS:
-        src = SEL / "qual_ablation" / scene_dir
+    full_dir     = PAPER / "addref_bettercam_0.01" / OURS_SUBDIR
+    no_lidar_dir = (PAPER / "addref_novace_0.01"
+                          / "GeoI2VLoRA_waymo_multi_vace_UCPE_addref_novace_frameidv3_stronglora_bettercam")
+    no_cam_dir   = (PAPER / "noref_vaceonly_0.01"
+                          / "GeoI2VLoRA_waymo_multi_vace_NoCam_noref_vaceonly_frameidv3_stronglora_vacedepth_encodevacemask")
+    no_ref_dir   = (PAPER / "noref_bettercam_0.01"
+                          / "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_vacedepth_encodevacemask_bettercam")
+    for sample_id, scene_dir, _ in ABLATION_SCENES:
         dst = ASSETS / "ablation" / scene_dir
-        for k, v in abl_map.items():
-            install(src / k, dst / v, MODE)
-        sample_id = abl_lidar_map[scene_dir]
-        install(abl_lidar_dir / f"{sample_id}_cond.mp4",
-                dst / "lidar.mp4", MODE)
+        install(full_dir     / f"{sample_id}_gt.mp4",        dst / "gt.mp4",       MODE)
+        install(full_dir     / f"{sample_id}_cond.mp4",      dst / "lidar.mp4",    MODE)
+        install(full_dir     / f"{sample_id}_generated.mp4", dst / "full.mp4",     MODE)
+        install(no_lidar_dir / f"{sample_id}_generated.mp4", dst / "no_lidar.mp4", MODE)
+        install(no_cam_dir   / f"{sample_id}_generated.mp4", dst / "no_cam.mp4",   MODE)
+        install(no_ref_dir   / f"{sample_id}_generated.mp4", dst / "no_ref.mp4",   MODE)
 
     # ---- §4 sparsity ----------------------------------------------------
     # Source everything from paper_ready directly so new scenes don't need to
