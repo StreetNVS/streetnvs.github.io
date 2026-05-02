@@ -46,8 +46,8 @@
     <div class="section-eyebrow">§1 · Unseen novel view synthesis</div>
     <h2>Synthesizing trajectories far from the vehicle path</h2>
     <p>
-      For each scene we render four camera trajectories that depart from the
-      original ego-trajectory: <em>Elevation</em> (BEV-like),
+      Pick a scene below to render four camera trajectories that depart from
+      the original ego-trajectory: <em>Elevation</em> (BEV-like),
       <em>Lane Shift</em> (sideways translation), <em>Spiral</em>
       (orbital sweep around the source pose), and <em>Rotation</em> (yaw turn).
       Drag the slider on any clip to wipe between the synthesized RGB output
@@ -76,12 +76,11 @@
     <div class="section-eyebrow">§2 · Comparison with baselines</div>
     <h2>Side-by-side against state-of-the-art</h2>
     <p>
-      Pick any baseline above to slot it into the third panel of every scene.
-      Each block then shows ground-truth, our LiDAR input, the selected
-      baseline, and StreetNVS side-by-side. The first two scenes are the
-      anchors used in the paper; the rest are extrapolation cases at sparsity
-      ratio 0.1 where StreetNVS shows the largest PSNR gain over
-      <em>StreetCrafter*</em>.
+      Pick a scene and a baseline below; the four panels read left → right as
+      <em>LiDAR input · selected baseline · StreetNVS · ground truth</em>.
+      The first two scenes are the anchors used in the paper; the rest are
+      extrapolation cases where StreetNVS shows a clear margin over the
+      strongest LiDAR-aware comparison, <em>StreetCrafter*</em>.
     </p>
   </div>
 
@@ -127,11 +126,12 @@
     <div class="section-eyebrow">§3 · Demo on variable LiDAR sparsity</div>
     <h2>How much LiDAR is enough?</h2>
     <p>
-      Pick a scene and sweep the density slider between 0.1% and 100% of the
-      original LiDAR points. The middle panel shows what the model actually receives
-      as conditioning; the right panel is StreetNVS's output. Even at 0.1% density,
-      structure and identity hold up, while the appearance gradually sharpens as
-      more anchors come back.
+      Pick a scene and sweep the density slider between 0.1 % and 100 % of
+      the original LiDAR points. The four panels read left → right as
+      <em>LiDAR input · StreetCrafter* · StreetNVS · ground truth</em>.
+      Even at 0.1 % density, StreetNVS keeps structure and identity intact
+      while StreetCrafter* breaks down; the appearance sharpens gracefully
+      as more anchors come back.
     </p>
   </div>
 
@@ -187,10 +187,12 @@
     <div class="section-eyebrow">§4 · Ablation study</div>
     <h2>Each conditioning signal carries weight</h2>
     <p>
-      Removing the LiDAR scaffold, the relative-camera-pose stream, or the reference
-      view each degrades a different aspect of consistency. Top row pairs the ground
-      truth with our full model; the bottom row shows the three ablations stripped
-      of one signal at a time.
+      Pick a scene and compare our full model against three reduced variants.
+      The top row reads <em>LiDAR input · ground truth · StreetNVS Full</em>;
+      the bottom row drops one conditioning signal at a time —
+      <em>w/ Camera Only</em> (no LiDAR scaffold), <em>w/ Projection Only</em>
+      (no relative camera pose), and <em>w/o Reference</em> (no source-view
+      anchor). Each removal degrades a different facet of consistency.
     </p>
   </div>
 
