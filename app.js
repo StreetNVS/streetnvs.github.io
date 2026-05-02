@@ -21,12 +21,12 @@ const NOVEL_TRAJ_ORDER = [
 
 /* ---- §2 baselines ---- */
 const BASELINE_SCENES = [
-  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor (s75_c2, ratio 0.01)" },
-  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor (s76_c3, ratio 0.01)" },
-  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "ratio 0.1 · gain +4.87 PSNR"       },
-  { id: "scene085_cam0", label: "Scene 085 · cam 0", note: "ratio 0.1 · gain +3.12 PSNR"       },
-  { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "ratio 0.1 · gain +2.70 PSNR"       },
-  { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "ratio 0.1 · gain +2.26 PSNR"       },
+  { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor"     },
+  { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor"     },
+  { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "extrapolation"    },
+  { id: "scene085_cam0", label: "Scene 085 · cam 0", note: "extrapolation"    },
+  { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "extrapolation"    },
+  { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "extrapolation"    },
 ];
 
 /* ---- §3 ablation ---- */
@@ -35,20 +35,19 @@ const ABLATION_SCENES = [
   { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor (s169_c4)"         },
 ];
 
-/* ---- §4 sparsity (user-pinned order; scene 136 cam 0 unavailable, falls back to cam 1) ---- */
+/* ---- §4 sparsity (user-pinned order: cam-0 trio first, then side-cam wins) ---- */
 const SPARSITY_SCENES = [
-  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
-  { id: "scene107_cam0", label: "Scene 107 · cam 0" },
-  { id: "scene136_cam1", label: "Scene 136 · cam 1" },
-  { id: "scene173_cam2", label: "Scene 173 · cam 2" },
-  { id: "scene156_cam1", label: "Scene 156 · cam 1" },
-  { id: "scene054_cam2", label: "Scene 054 · cam 2" },
-  { id: "scene013_cam0", label: "Scene 013 · cam 0" },
-  { id: "scene105_cam0", label: "Scene 105 · cam 0" },
   { id: "scene162_cam0", label: "Scene 162 · cam 0" },
   { id: "scene121_cam0", label: "Scene 121 · cam 0" },
-  { id: "scene182_cam0", label: "Scene 182 · cam 0" },
   { id: "scene142_cam0", label: "Scene 142 · cam 0" },
+  { id: "scene187_cam2", label: "Scene 187 · cam 2" },
+  { id: "scene030_cam3", label: "Scene 030 · cam 3" },
+  { id: "scene050_cam4", label: "Scene 050 · cam 4" },
+  { id: "scene096_cam3", label: "Scene 096 · cam 3" },
+  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
+  { id: "scene182_cam0", label: "Scene 182 · cam 0" },
+  { id: "scene013_cam0", label: "Scene 013 · cam 0" },
+  { id: "scene173_cam2", label: "Scene 173 · cam 2" },
 ];
 const RATIOS = ["0.001", "0.01", "0.1", "1"];
 
@@ -403,7 +402,9 @@ function buildSparsity() {
 /* Per-section play/pause toggle                                       */
 /* =================================================================== */
 function wireSectionToggles() {
-  document.querySelectorAll(".section-toggle").forEach((btn) => {
+  // Only the section-head pills — exclude the per-block buttons that share
+  // the .section-toggle class for styling.
+  document.querySelectorAll(".section-toggle:not(.block-toggle)").forEach((btn) => {
     const section = btn.closest("section");
     const text = btn.querySelector(".text");
     const icon = btn.querySelector(".icon");
