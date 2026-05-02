@@ -35,19 +35,13 @@ const ABLATION_SCENES = [
   { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor (s169_c4)"         },
 ];
 
-/* ---- §4 sparsity (user-pinned order: cam-0 trio first, then side-cam wins) ---- */
+/* ---- sparsity (cam-0 trio first, then two side-camera cases) ---- */
 const SPARSITY_SCENES = [
   { id: "scene162_cam0", label: "Scene 162 · cam 0" },
   { id: "scene121_cam0", label: "Scene 121 · cam 0" },
-  { id: "scene142_cam0", label: "Scene 142 · cam 0" },
+  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
   { id: "scene187_cam2", label: "Scene 187 · cam 2" },
   { id: "scene030_cam3", label: "Scene 030 · cam 3" },
-  { id: "scene050_cam4", label: "Scene 050 · cam 4" },
-  { id: "scene096_cam3", label: "Scene 096 · cam 3" },
-  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
-  { id: "scene182_cam0", label: "Scene 182 · cam 0" },
-  { id: "scene013_cam0", label: "Scene 013 · cam 0" },
-  { id: "scene173_cam2", label: "Scene 173 · cam 2" },
 ];
 const RATIOS = ["0.001", "0.01", "0.1", "1"];
 
@@ -102,7 +96,7 @@ function makeSwipeCard({ topSrc, bottomSrc, label, ours = false, hint = "drag to
   track.addEventListener("pointerup",   () => { dragging = false; });
   track.addEventListener("click", (e) => setPos(e.clientX));
 
-  return card;
+  return { card, top: vTop, bottom: vBottom };
 }
 
 /* a plain (non-swipe) video card */
@@ -117,61 +111,53 @@ function makeStaticCard({ src, label, ours = false, lidar = false }) {
   return card;
 }
 
-/* Adds a Pause/Play pill to a .scene-block header that controls only the
- * videos inside that block. Mirrors the section-level toggle behavior. */
-function attachBlockToggle(block) {
-  const header = block.querySelector(".scene-block-header");
-  if (!header) return;
-  const btn = document.createElement("button");
-  btn.className = "section-toggle block-toggle";
-  btn.dataset.state = "playing";
-  btn.setAttribute("aria-label", "Pause videos in this block");
-  btn.innerHTML = `<span class="icon">❚❚</span><span class="text">Pause</span>`;
-  btn.addEventListener("click", () => {
-    const playing = btn.dataset.state === "playing";
-    const videos = block.querySelectorAll("video");
-    if (playing) {
-      videos.forEach((v) => v.pause());
-      btn.dataset.state = "paused";
-      btn.querySelector(".text").textContent = "Play";
-      btn.querySelector(".icon").textContent = "▶";
-    } else {
-      videos.forEach((v) => v.play().catch(() => {}));
-      btn.dataset.state = "playing";
-      btn.querySelector(".text").textContent = "Pause";
-      btn.querySelector(".icon").textContent = "❚❚";
-    }
-  });
-  header.appendChild(btn);
-}
-
 /* =================================================================== */
 /* §1 — novel view                                                     */
 /* =================================================================== */
 function buildNovel() {
-  const root = document.getElementById("novel-blocks");
-  for (const scene of NOVEL_SCENES) {
-    const block = document.createElement("div");
-    block.className = "scene-block";
-    block.innerHTML = `
-      <div class="scene-block-header">
-        <h3>${scene.label}</h3>
-        <span class="tag">${scene.note}</span>
-      </div>
-      <div class="novel-grid"></div>
-    `;
-    const grid = block.querySelector(".novel-grid");
-    for (const traj of NOVEL_TRAJ_ORDER) {
-      const dir = `assets/novel_view/${scene.id}/${traj.key}`;
-      grid.appendChild(makeSwipeCard({
-        topSrc:    `${dir}/gen.mp4`,
-        bottomSrc: `${dir}/cond.mp4`,
-        label:     traj.label,
-      }));
+  const grid      = document.getElementById("novel-grid");
+  const sceneBtns = document.getElementById("novel-scene-buttons");
+  const noteEl    = document.getElementById("novel-note");
+
+  let curScene = NOVEL_SCENES[0];
+
+  // Build the four trajectory cards once and remember each pair of videos so
+  // we can swap their srcs in place when the user picks a different scene.
+  const cards = NOVEL_TRAJ_ORDER.map((traj) => {
+    const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
+    const c = makeSwipeCard({
+      topSrc:    `${dir}/gen.mp4`,
+      bottomSrc: `${dir}/cond.mp4`,
+      label:     traj.label,
+    });
+    grid.appendChild(c.card);
+    return { traj, top: c.top, bottom: c.bottom };
+  });
+
+  function applyState() {
+    for (const { traj, top, bottom } of cards) {
+      const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
+      const t = isFinite(top.currentTime) ? top.currentTime : 0;
+      swapAndSeek(top,    `${dir}/gen.mp4`,  t);
+      swapAndSeek(bottom, `${dir}/cond.mp4`, t);
     }
-    attachBlockToggle(block);
-    root.appendChild(block);
+    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
   }
+
+  for (const [i, scene] of NOVEL_SCENES.entries()) {
+    const b = document.createElement("button");
+    b.textContent = scene.label;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => {
+      [...sceneBtns.children].forEach((c) => c.classList.remove("active"));
+      b.classList.add("active");
+      curScene = scene;
+      applyState();
+    });
+    sceneBtns.appendChild(b);
+  }
+
+  noteEl.textContent = `${curScene.label} — ${curScene.note}`;
 }
 
 /* =================================================================== */

@@ -355,11 +355,12 @@ section.section {
 .video-card.swipe .swipe-side.right { right: 8px; color: #fff; }
 
 
-/* ---------- section 1 layout: 4 across ---------- */
+/* ---------- section 1 layout: 4 trajectory tiles in one row ---------- */
 .novel-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 @media (max-width: 1100px) { .novel-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px)  { .novel-grid { grid-template-columns: 1fr; } }

@@ -44,19 +44,11 @@ TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
 ABLATION_DIRS  = ["scene000_cam2", "scene169_cam4"]
 SPARSITY_SCENES = [
     # (scene_dir, sample_id) — ordered as the website should display them.
-    # The first three are pinned cam-0 examples; the next four are side-camera
-    # cases where Ours dominates StreetCrafter* in the sparse (≤0.01) regime.
     ("scene162_cam0", "waymo_000810_s162_c0"),
     ("scene121_cam0", "waymo_000605_s121_c0"),
-    ("scene142_cam0", "waymo_000710_s142_c0"),
+    ("scene137_cam0", "waymo_000685_s137_c0"),
     ("scene187_cam2", "waymo_000937_s187_c2"),  # side; sparse_gap +4.40
     ("scene030_cam3", "waymo_000153_s30_c3"),   # side; sparse_gap +4.32
-    ("scene050_cam4", "waymo_000254_s50_c4"),   # side; sparse_gap +4.21
-    ("scene096_cam3", "waymo_000483_s96_c3"),   # side; sparse_gap +4.40
-    ("scene137_cam0", "waymo_000685_s137_c0"),
-    ("scene182_cam0", "waymo_000910_s182_c0"),
-    ("scene013_cam0", "waymo_000065_s13_c0"),
-    ("scene173_cam2", "waymo_000867_s173_c2"),
 ]
 SPARSITY_RATIOS = ["0.001", "0.01", "0.1", "1"]
 PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01

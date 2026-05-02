@@ -14,8 +14,8 @@
     <div class="nav-links">
       <a href="#novel">Novel View</a>
       <a href="#baselines">Comparison vs. Baselines</a>
-      <a href="#ablation">Ablation</a>
       <a href="#sparsity">LiDAR Sparsity</a>
+      <a href="#ablation">Ablation</a>
     </div>
   </div>
 </nav>
@@ -55,7 +55,14 @@
     </p>
   </div>
 
-  <div id="novel-blocks"></div>
+  <div class="sparsity-controls baseline-controls">
+    <label>Scene</label>
+    <div class="scene-buttons" id="novel-scene-buttons"></div>
+  </div>
+
+  <div id="novel-note" class="baseline-note"></div>
+
+  <div id="novel-grid" class="novel-grid"></div>
 </section>
 
 <!-- =============================================================== -->
@@ -110,67 +117,14 @@
 </section>
 
 <!-- =============================================================== -->
-<!-- §3 Ablation -->
-<!-- =============================================================== -->
-<section id="ablation" class="section">
-  <div class="section-head">
-    <button class="section-toggle" data-state="playing" aria-label="Pause all videos in this section">
-      <span class="icon">❚❚</span><span class="text">Pause</span>
-    </button>
-    <div class="section-eyebrow">§3 · Ablation study</div>
-    <h2>Each conditioning signal carries weight</h2>
-    <p>
-      Removing the LiDAR scaffold, the relative-camera-pose stream, or the reference
-      view each degrades a different aspect of consistency. Top row pairs the ground
-      truth with our full model; the bottom row shows the three ablations stripped
-      of one signal at a time.
-    </p>
-  </div>
-
-  <div class="sparsity-controls baseline-controls">
-    <label>Scene</label>
-    <div class="scene-buttons" id="ablation-scene-buttons"></div>
-  </div>
-
-  <div id="ablation-note" class="baseline-note"></div>
-
-  <div class="grid-2x3 ablation-grid">
-    <div class="video-card">
-      <span class="label lidar">LiDAR Input</span>
-      <video id="abl-lidar" autoplay loop muted playsinline></video>
-    </div>
-    <div class="video-card">
-      <span class="label">Ground Truth</span>
-      <video id="abl-gt" autoplay loop muted playsinline></video>
-    </div>
-    <div class="video-card">
-      <span class="label ours">StreetNVS Full</span>
-      <video id="abl-full" autoplay loop muted playsinline></video>
-    </div>
-    <div class="video-card">
-      <span class="label">Ours w/ Camera Only</span>
-      <video id="abl-no-lidar" autoplay loop muted playsinline></video>
-    </div>
-    <div class="video-card">
-      <span class="label">Ours w/ Projection Only</span>
-      <video id="abl-no-cam" autoplay loop muted playsinline></video>
-    </div>
-    <div class="video-card">
-      <span class="label">Ours w/o Reference</span>
-      <video id="abl-no-ref" autoplay loop muted playsinline></video>
-    </div>
-  </div>
-</section>
-
-<!-- =============================================================== -->
-<!-- §4 Sparsity demo -->
+<!-- §3 Sparsity demo (was §4) -->
 <!-- =============================================================== -->
 <section id="sparsity" class="section">
   <div class="section-head">
     <button class="section-toggle" data-state="playing" aria-label="Pause all videos in this section">
       <span class="icon">❚❚</span><span class="text">Pause</span>
     </button>
-    <div class="section-eyebrow">§4 · Demo on variable LiDAR sparsity</div>
+    <div class="section-eyebrow">§3 · Demo on variable LiDAR sparsity</div>
     <h2>How much LiDAR is enough?</h2>
     <p>
       Pick a scene and sweep the density slider between 0.1% and 100% of the
@@ -218,6 +172,59 @@
       <span data-i="1">0.01</span>
       <span data-i="2" class="active">0.1</span>
       <span data-i="3">1</span>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================== -->
+<!-- §4 Ablation (was §3) -->
+<!-- =============================================================== -->
+<section id="ablation" class="section">
+  <div class="section-head">
+    <button class="section-toggle" data-state="playing" aria-label="Pause all videos in this section">
+      <span class="icon">❚❚</span><span class="text">Pause</span>
+    </button>
+    <div class="section-eyebrow">§4 · Ablation study</div>
+    <h2>Each conditioning signal carries weight</h2>
+    <p>
+      Removing the LiDAR scaffold, the relative-camera-pose stream, or the reference
+      view each degrades a different aspect of consistency. Top row pairs the ground
+      truth with our full model; the bottom row shows the three ablations stripped
+      of one signal at a time.
+    </p>
+  </div>
+
+  <div class="sparsity-controls baseline-controls">
+    <label>Scene</label>
+    <div class="scene-buttons" id="ablation-scene-buttons"></div>
+  </div>
+
+  <div id="ablation-note" class="baseline-note"></div>
+
+  <div class="grid-2x3 ablation-grid">
+    <div class="video-card">
+      <span class="label lidar">LiDAR Input</span>
+      <video id="abl-lidar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">Ground Truth</span>
+      <video id="abl-gt" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label ours">StreetNVS Full</span>
+      <video id="abl-full" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">Ours w/ Camera Only</span>
+      <video id="abl-no-lidar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">Ours w/ Projection Only</span>
+      <video id="abl-no-cam" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">Ours w/o Reference</span>
+      <video id="abl-no-ref" autoplay loop muted playsinline></video>
     </div>
   </div>
 </section>
