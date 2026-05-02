@@ -42,10 +42,22 @@ SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encod
 NOVEL_SCENES   = ["s10", "s2", "s5", "s11", "s15"]
 TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
 ABLATION_DIRS  = ["scene000_cam2", "scene169_cam4"]
-SPARSITY_DIRS  = [
-    "scene013_cam0", "scene054_cam2", "scene105_cam0", "scene107_cam0",
-    "scene136_cam1", "scene137_cam0", "scene156_cam1", "scene173_cam2",
+SPARSITY_SCENES = [
+    # (scene_dir, sample_id) — ordered as the website should display them.
+    ("scene137_cam0", "waymo_000685_s137_c0"),
+    ("scene107_cam0", "waymo_000535_s107_c0"),
+    ("scene136_cam1", "waymo_000681_s136_c1"),  # cam0 not generated; cam1 is the s136 case
+    ("scene173_cam2", "waymo_000867_s173_c2"),
+    ("scene156_cam1", "waymo_000781_s156_c1"),
+    ("scene054_cam2", "waymo_000272_s54_c2"),
+    ("scene013_cam0", "waymo_000065_s13_c0"),
+    ("scene105_cam0", "waymo_000525_s105_c0"),
+    ("scene162_cam0", "waymo_000810_s162_c0"),
+    ("scene121_cam0", "waymo_000605_s121_c0"),
+    ("scene182_cam0", "waymo_000910_s182_c0"),
+    ("scene142_cam0", "waymo_000710_s142_c0"),
 ]
+SPARSITY_RATIOS = ["0.001", "0.01", "0.1", "1"]
 PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01
 NEW_BASELINES   = [
     ("waymo_000453_s90_c3",  "scene090_cam3"),
@@ -169,19 +181,30 @@ def main():
                 dst / "lidar.mp4", MODE)
 
     # ---- §4 sparsity ----------------------------------------------------
+    # Source everything from paper_ready directly so new scenes don't need to
+    # be pre-staged into selected_videos/qual_multi_sparsity.
     print("== sparsity ==")
-    _sid_re = re.compile(r"sample_id\s*:\s*(\S+)")
-    for scene_dir in SPARSITY_DIRS:
-        readme = (SEL / "qual_multi_sparsity" / scene_dir / "README.txt").read_text()
-        sample_id = _sid_re.search(readme).group(1)
-        src = SEL / "qual_multi_sparsity" / scene_dir
+    OURS_RATIO_DIRS = {
+        r: PAPER / f"addref_bettercam_{r}" / OURS_SUBDIR for r in SPARSITY_RATIOS
+    }
+    SC_STAR_RATIO_DIRS = {
+        "0.001": PAPER / "streetcrafter_star_0.001" / SC_STAR_SUB,
+        "0.01":  PAPER / "streetcrafter_star_0.01_temp",          # no inner subdir
+        "0.1":   PAPER / "streetcrafter_star_0.1"   / SC_STAR_SUB,
+        "1":     PAPER / "streetcrafter_star_1"     / SC_STAR_SUB,
+    }
+    for scene_dir, sample_id in SPARSITY_SCENES:
         dst = ASSETS / "sparsity" / scene_dir
         install(base01 / f"{sample_id}_gt.mp4", dst / "gt.mp4", MODE)
-        for ratio in ["0.001", "0.01", "0.1", "1"]:
-            install(src / "lidar" / f"{ratio}.mp4",
-                    dst / "lidar" / f"{ratio}.mp4", MODE)
-            install(src / "ours"  / f"{ratio}.mp4",
-                    dst / "ours"  / f"{ratio}.mp4", MODE)
+        for ratio in SPARSITY_RATIOS:
+            ours_dir = OURS_RATIO_DIRS[ratio]
+            scs_dir  = SC_STAR_RATIO_DIRS[ratio]
+            install(ours_dir / f"{sample_id}_cond.mp4",
+                    dst / "lidar"  / f"{ratio}.mp4", MODE)
+            install(ours_dir / f"{sample_id}_generated.mp4",
+                    dst / "ours"   / f"{ratio}.mp4", MODE)
+            install(scs_dir  / f"{sample_id}_generated.mp4",
+                    dst / "sc_star"/ f"{ratio}.mp4", MODE)
 
     print("done")
 

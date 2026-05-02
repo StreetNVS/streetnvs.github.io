@@ -13,10 +13,10 @@ const NOVEL_SCENES = [
   { id: "scene015", label: "Scene 015", note: "s15" },
 ];
 const NOVEL_TRAJ_ORDER = [
-  { key: "barron",     label: "Barron"     },
-  { key: "elevate",    label: "Elevate"    },
+  { key: "elevate",    label: "Elevation"  },
   { key: "lane_shift", label: "Lane Shift" },
-  { key: "rotate",     label: "Rotate"     },
+  { key: "barron",     label: "Spiral"     },
+  { key: "rotate",     label: "Rotation"   },
 ];
 
 /* ---- §2 baselines ---- */
@@ -35,16 +35,20 @@ const ABLATION_SCENES = [
   { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor (s169_c4)"         },
 ];
 
-/* ---- §4 sparsity (sorted: largest avg PSNR gap over StreetCrafter* first) ---- */
+/* ---- §4 sparsity (user-pinned order; scene 136 cam 0 unavailable, falls back to cam 1) ---- */
 const SPARSITY_SCENES = [
-  { id: "scene173_cam2", label: "Scene 173 · cam 2" },  // gap_avg 2.74
-  { id: "scene156_cam1", label: "Scene 156 · cam 1" },  // gap_avg 2.26
-  { id: "scene054_cam2", label: "Scene 054 · cam 2" },  // gap_avg 2.03
-  { id: "scene137_cam0", label: "Scene 137 · cam 0" },  // gap_avg 2.03
-  { id: "scene107_cam0", label: "Scene 107 · cam 0" },  // gap_avg 1.84
-  { id: "scene136_cam1", label: "Scene 136 · cam 1" },  // gap_avg 1.84
-  { id: "scene013_cam0", label: "Scene 013 · cam 0" },  // gap_avg 1.46
-  { id: "scene105_cam0", label: "Scene 105 · cam 0" },  // gap_avg 1.44
+  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
+  { id: "scene107_cam0", label: "Scene 107 · cam 0" },
+  { id: "scene136_cam1", label: "Scene 136 · cam 1" },
+  { id: "scene173_cam2", label: "Scene 173 · cam 2" },
+  { id: "scene156_cam1", label: "Scene 156 · cam 1" },
+  { id: "scene054_cam2", label: "Scene 054 · cam 2" },
+  { id: "scene013_cam0", label: "Scene 013 · cam 0" },
+  { id: "scene105_cam0", label: "Scene 105 · cam 0" },
+  { id: "scene162_cam0", label: "Scene 162 · cam 0" },
+  { id: "scene121_cam0", label: "Scene 121 · cam 0" },
+  { id: "scene182_cam0", label: "Scene 182 · cam 0" },
+  { id: "scene142_cam0", label: "Scene 142 · cam 0" },
 ];
 const RATIOS = ["0.001", "0.01", "0.1", "1"];
 
@@ -145,38 +149,94 @@ function buildNovel() {
 /* =================================================================== */
 /* §2 — baselines (2-3-3)                                              */
 /* =================================================================== */
+const BASELINE_METHODS = [
+  { key: "freevs",  label: "FreeVS"         },
+  { key: "gen3c",   label: "Gen3C"          },
+  { key: "vace",    label: "VACE"           },
+  { key: "sc",      label: "StreetCrafter"  },
+  { key: "sc_star", label: "StreetCrafter*" },
+];
+
 function buildBaselines() {
-  const root = document.getElementById("baseline-blocks");
-  for (const scene of BASELINE_SCENES) {
-    const dir = `assets/baselines/${scene.id}`;
-    const block = document.createElement("div");
-    block.className = "scene-block compare-block";
-    block.innerHTML = `
-      <div class="scene-block-header">
-        <h3>${scene.label}</h3>
-        <span class="tag">${scene.note}</span>
-      </div>
-      <div class="row row-2"></div>
-      <div class="row row-3 baselines"></div>
-      <div class="row row-3 ours-row"></div>
-    `;
-    const r1 = block.querySelector(".row-2");
-    const r2 = block.querySelector(".baselines");
-    const r3 = block.querySelector(".ours-row");
+  const sceneBtns  = document.getElementById("baseline-scene-buttons");
+  const methodBtns = document.getElementById("baseline-method-buttons");
+  const noteEl     = document.getElementById("baseline-note");
+  const lblBase    = document.getElementById("bsl-baseline-label");
 
-    r1.appendChild(makeStaticCard({ src: `${dir}/gt.mp4`,    label: "Ground Truth" }));
-    r1.appendChild(makeStaticCard({ src: `${dir}/lidar.mp4`, label: "LiDAR Input", lidar: true }));
+  const vGT   = document.getElementById("bsl-gt");
+  const vLid  = document.getElementById("bsl-lidar");
+  const vBase = document.getElementById("bsl-baseline");
+  const vOurs = document.getElementById("bsl-ours");
 
-    r2.appendChild(makeStaticCard({ src: `${dir}/freevs.mp4`, label: "FreeVS" }));
-    r2.appendChild(makeStaticCard({ src: `${dir}/gen3c.mp4`,  label: "Gen3C"  }));
-    r2.appendChild(makeStaticCard({ src: `${dir}/vace.mp4`,   label: "VACE"   }));
+  let curScene  = BASELINE_SCENES[0];
+  let curMethod = "sc_star";   // strongest LiDAR-aware baseline by default
 
-    r3.appendChild(makeStaticCard({ src: `${dir}/sc.mp4`,      label: "StreetCrafter"  }));
-    r3.appendChild(makeStaticCard({ src: `${dir}/sc_star.mp4`, label: "StreetCrafter*" }));
-    r3.appendChild(makeStaticCard({ src: `${dir}/ours.mp4`,    label: "StreetNVS (Ours)", ours: true }));
-
-    root.appendChild(block);
+  // Re-use the master-clock pattern: vOurs leads, the rest follow.
+  const FOLLOWERS = [vGT, vLid, vBase];
+  const SYNC_TOL  = 0.15;
+  function seekTo(v, t) {
+    const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : null;
+    v.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
   }
+  function swapAndSeek(v, newSrc, t) {
+    if (v.getAttribute("src") === newSrc) return;
+    const wasPaused = v.paused;
+    v.addEventListener("loadedmetadata", () => {
+      seekTo(v, t);
+      if (!wasPaused) v.play().catch(() => {});
+    }, { once: true });
+    v.src = newSrc;
+  }
+
+  function applyState() {
+    const dir = `assets/baselines/${curScene.id}`;
+    const t = isFinite(vOurs.currentTime) ? vOurs.currentTime : 0;
+    swapAndSeek(vGT,   `${dir}/gt.mp4`,    t);
+    swapAndSeek(vLid,  `${dir}/lidar.mp4`, t);
+    swapAndSeek(vBase, `${dir}/${curMethod}.mp4`, t);
+    swapAndSeek(vOurs, `${dir}/ours.mp4`,  t);
+    lblBase.textContent = BASELINE_METHODS.find((m) => m.key === curMethod).label;
+    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+  }
+
+  vOurs.addEventListener("timeupdate", () => {
+    const t = vOurs.currentTime;
+    if (!isFinite(t)) return;
+    for (const v of FOLLOWERS) {
+      if (!isFinite(v.duration) || v.duration <= 0) continue;
+      if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
+    }
+  });
+
+  // Scene buttons
+  for (const [i, scene] of BASELINE_SCENES.entries()) {
+    const b = document.createElement("button");
+    b.textContent = scene.label;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => {
+      [...sceneBtns.children].forEach((c) => c.classList.remove("active"));
+      b.classList.add("active");
+      curScene = scene;
+      applyState();
+    });
+    sceneBtns.appendChild(b);
+  }
+
+  // Method buttons
+  for (const m of BASELINE_METHODS) {
+    const b = document.createElement("button");
+    b.textContent = m.label;
+    if (m.key === curMethod) b.classList.add("active");
+    b.addEventListener("click", () => {
+      [...methodBtns.children].forEach((c) => c.classList.remove("active"));
+      b.classList.add("active");
+      curMethod = m.key;
+      applyState();
+    });
+    methodBtns.appendChild(b);
+  }
+
+  applyState();
 }
 
 /* =================================================================== */
@@ -217,6 +277,7 @@ function buildSparsity() {
   const valLbl  = document.getElementById("spa-density-value");
   const vGT     = document.getElementById("spa-gt");
   const vLid    = document.getElementById("spa-lidar");
+  const vSCS    = document.getElementById("spa-scstar");
   const vOurs   = document.getElementById("spa-ours");
 
   let curScene = SPARSITY_SCENES[0].id;
@@ -226,7 +287,7 @@ function buildSparsity() {
 
   // vOurs is the master clock; the others are kept aligned to it. This avoids
   // drift from independent autoplay and from per-video swap timings.
-  const FOLLOWERS = [vGT, vLid];
+  const FOLLOWERS = [vGT, vLid, vSCS];
   const SYNC_TOL  = 0.15;   // seconds — drift threshold before we resync
 
   function seekTo(video, t) {
@@ -258,8 +319,9 @@ function buildSparsity() {
       vGT.dataset.scene = curScene;
       swapAndSeek(vGT, `${dir}/gt.mp4`, t);
     }
-    swapAndSeek(vLid,  `${dir}/lidar/${curRatio}.mp4`, t);
-    swapAndSeek(vOurs, `${dir}/ours/${curRatio}.mp4`,  t);
+    swapAndSeek(vLid,  `${dir}/lidar/${curRatio}.mp4`,    t);
+    swapAndSeek(vSCS,  `${dir}/sc_star/${curRatio}.mp4`,  t);
+    swapAndSeek(vOurs, `${dir}/ours/${curRatio}.mp4`,     t);
 
     valLbl.textContent = curRatio;
     tickEls.forEach((el, i) => el.classList.toggle("active", RATIOS[i] === curRatio));

@@ -372,6 +372,16 @@ section.section {
 }
 
 
+/* ---------- section 2 baselines (single-grid controller) ---------- */
+.baseline-note {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+.baseline-grid { margin-bottom: 8px; }
+
 /* ---------- section 4 sparsity ---------- */
 .sparsity-controls {
   display: flex;
@@ -419,11 +429,12 @@ section.section {
 }
 .sparsity-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 16px;
 }
-@media (max-width: 800px) { .sparsity-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .sparsity-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .sparsity-grid { grid-template-columns: 1fr; } }
 
 .density-slider {
   background: var(--bg-1);

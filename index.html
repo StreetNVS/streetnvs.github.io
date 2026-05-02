@@ -46,11 +46,12 @@
     <div class="section-eyebrow">§1 · Unseen novel view synthesis</div>
     <h2>Synthesizing trajectories far from the vehicle path</h2>
     <p>
-      For each scene we render four camera trajectories that depart from the original
-      ego-trajectory: <em>Barron</em> (close to source), <em>Elevate</em> (BEV-like),
-      <em>Lane Shift</em> (sideways translation), and <em>Rotate</em> (yaw rotation).
-      Drag the slider on any clip to wipe between the synthesized RGB output (left)
-      and its underlying LiDAR conditioning (right).
+      For each scene we render four camera trajectories that depart from the
+      original ego-trajectory: <em>Elevation</em> (BEV-like),
+      <em>Lane Shift</em> (sideways translation), <em>Spiral</em>
+      (orbital sweep around the source pose), and <em>Rotation</em> (yaw turn).
+      Drag the slider on any clip to wipe between the synthesized RGB output
+      (left) and its underlying LiDAR conditioning (right).
     </p>
   </div>
 
@@ -68,17 +69,44 @@
     <div class="section-eyebrow">§2 · Comparison with baselines</div>
     <h2>Side-by-side against state-of-the-art</h2>
     <p>
-      Each block compares ground-truth and our LiDAR conditioning (top row) with
-      three camera-only baselines—<em>FreeVS</em>, <em>Gen3C</em>, <em>VACE</em>—and
-      three LiDAR-aware methods: <em>StreetCrafter</em>, <em>StreetCrafter*</em>
-      (an in-domain re-implementation), and <em>Ours</em>. The first two scenes are
-      the anchors used in the paper; the last two are extrapolation cases at
-      sparsity ratio 0.1 where StreetNVS shows the largest PSNR gain over
-      StreetCrafter*.
+      Pick any baseline above to slot it into the third panel of every scene.
+      Each block then shows ground-truth, our LiDAR input, the selected
+      baseline, and StreetNVS side-by-side. The first two scenes are the
+      anchors used in the paper; the rest are extrapolation cases at sparsity
+      ratio 0.1 where StreetNVS shows the largest PSNR gain over
+      <em>StreetCrafter*</em>.
     </p>
   </div>
 
-  <div id="baseline-blocks"></div>
+  <div class="sparsity-controls baseline-controls">
+    <label>Scene</label>
+    <div class="scene-buttons" id="baseline-scene-buttons"></div>
+  </div>
+  <div class="sparsity-controls baseline-controls">
+    <label>Baseline</label>
+    <div class="scene-buttons" id="baseline-method-buttons"></div>
+  </div>
+
+  <div id="baseline-note" class="baseline-note"></div>
+
+  <div class="sparsity-grid baseline-grid">
+    <div class="video-card">
+      <span class="label">Ground Truth</span>
+      <video id="bsl-gt" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label lidar">LiDAR Input</span>
+      <video id="bsl-lidar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label" id="bsl-baseline-label">StreetCrafter*</span>
+      <video id="bsl-baseline" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label ours">StreetNVS (Ours)</span>
+      <video id="bsl-ours" autoplay loop muted playsinline></video>
+    </div>
+  </div>
 </section>
 
 <!-- =============================================================== -->
@@ -134,6 +162,10 @@
     <div class="video-card">
       <span class="label lidar">LiDAR Input</span>
       <video id="spa-lidar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">StreetCrafter*</span>
+      <video id="spa-scstar" autoplay loop muted playsinline></video>
     </div>
     <div class="video-card">
       <span class="label ours">StreetNVS</span>
