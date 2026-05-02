@@ -175,6 +175,74 @@ function buildNovel() {
 }
 
 /* =================================================================== */
+/* Shared video helpers (used by §2, §3, §4)                           */
+/* =================================================================== */
+
+// Section pause-state: read from the section-head toggle (not the per-block
+// pills, which share the .section-toggle class for styling).
+function sectionPaused(sectionEl) {
+  if (!sectionEl) return false;
+  const btn = sectionEl.querySelector(".section-head > .section-toggle:not(.block-toggle)");
+  return btn?.dataset.state === "paused";
+}
+
+function seekTo(v, t) {
+  const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : null;
+  v.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
+}
+
+// Lazily attach a canvas overlay to the video's parent .video-card. When src
+// is about to change, paint the current frame onto the canvas and show it —
+// once the new video's first frame is decoded ('loadeddata'), hide the
+// overlay. This masks the brief black flash that browsers render between
+// src swap and first-frame.
+function _ensureOverlay(v) {
+  const parent = v.parentElement;
+  if (!parent) return null;
+  let canvas = parent.querySelector(":scope > canvas.swap-overlay");
+  if (!canvas) {
+    canvas = document.createElement("canvas");
+    canvas.className = "swap-overlay";
+    parent.appendChild(canvas);
+  }
+  return canvas;
+}
+
+function _showLastFrame(v) {
+  if (!v.videoWidth || !v.videoHeight) return;
+  const canvas = _ensureOverlay(v);
+  if (!canvas) return;
+  canvas.width  = v.videoWidth;
+  canvas.height = v.videoHeight;
+  try { canvas.getContext("2d").drawImage(v, 0, 0); }
+  catch (e) { return; }                // tainted-canvas / not-ready guard
+  canvas.style.display = "block";
+}
+
+function _hideOverlay(v) {
+  const canvas = v.parentElement?.querySelector(":scope > canvas.swap-overlay");
+  if (canvas) canvas.style.display = "none";
+}
+
+// Swap a video's src, restore play-time, honor the section pause state,
+// and overlay the previous frame so the black flash is hidden.
+function swapAndSeek(v, newSrc, t) {
+  if (v.getAttribute("src") === newSrc) return;
+  const sectionEl = v.closest("section");
+  _showLastFrame(v);
+  v.addEventListener("loadedmetadata", () => {
+    seekTo(v, t);
+    if (sectionPaused(sectionEl)) v.pause();
+    else v.play().catch(() => {});
+  }, { once: true });
+  // First decoded frame of the new clip → safe to drop the overlay.
+  v.addEventListener("loadeddata", () => _hideOverlay(v), { once: true });
+  // Safety net: don't leave the overlay up indefinitely if events misfire.
+  setTimeout(() => _hideOverlay(v), 1500);
+  v.src = newSrc;
+}
+
+/* =================================================================== */
 /* §2 — baselines                                                      */
 /* =================================================================== */
 const BASELINE_METHODS = [
@@ -199,22 +267,9 @@ function buildBaselines() {
   let curScene  = BASELINE_SCENES[0];
   let curMethod = "sc_star";   // strongest LiDAR-aware baseline by default
 
-  // Re-use the master-clock pattern: vOurs leads, the rest follow.
+  // Master-clock pattern: vOurs leads, the rest follow.
   const FOLLOWERS = [vGT, vLid, vBase];
   const SYNC_TOL  = 0.15;
-  function seekTo(v, t) {
-    const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : null;
-    v.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
-  }
-  function swapAndSeek(v, newSrc, t) {
-    if (v.getAttribute("src") === newSrc) return;
-    const wasPaused = v.paused;
-    v.addEventListener("loadedmetadata", () => {
-      seekTo(v, t);
-      if (!wasPaused) v.play().catch(() => {});
-    }, { once: true });
-    v.src = newSrc;
-  }
 
   function applyState() {
     const dir = `assets/baselines/${curScene.id}`;
@@ -286,19 +341,6 @@ function buildAblation() {
   // vFull is the master clock; everyone else follows.
   const FOLLOWERS = [vLid, vGT, vNoLid, vNoCam, vNoRef];
   const SYNC_TOL  = 0.15;
-  function seekTo(v, t) {
-    const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : null;
-    v.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
-  }
-  function swapAndSeek(v, newSrc, t) {
-    if (v.getAttribute("src") === newSrc) return;
-    const wasPaused = v.paused;
-    v.addEventListener("loadedmetadata", () => {
-      seekTo(v, t);
-      if (!wasPaused) v.play().catch(() => {});
-    }, { once: true });
-    v.src = newSrc;
-  }
 
   function applyState() {
     const dir = `assets/ablation/${curScene.id}`;
@@ -359,24 +401,6 @@ function buildSparsity() {
   // drift from independent autoplay and from per-video swap timings.
   const FOLLOWERS = [vGT, vLid, vSCS];
   const SYNC_TOL  = 0.15;   // seconds — drift threshold before we resync
-
-  function seekTo(video, t) {
-    const dur = isFinite(video.duration) && video.duration > 0 ? video.duration : null;
-    video.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
-  }
-
-  // swap a video's source and seek it to `t` once metadata is ready.
-  function swapAndSeek(video, newSrc, t) {
-    if (video.getAttribute("src") === newSrc) return false;
-    const wasPaused = video.paused;
-    const onReady = () => {
-      seekTo(video, t);
-      if (!wasPaused) video.play().catch(() => {});
-    };
-    video.addEventListener("loadedmetadata", onReady, { once: true });
-    video.src = newSrc;
-    return true;
-  }
 
   function applyState() {
     const dir = `assets/sparsity/${curScene}`;

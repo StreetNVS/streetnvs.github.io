@@ -246,6 +246,17 @@ section.section {
   object-fit: cover;
   display: block;
 }
+/* Last-frame overlay used to mask the brief black flash when src swaps. */
+.video-card .swap-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+  pointer-events: none;
+  display: none;
+}
 .video-card .label {
   position: absolute;
   top: 8px; left: 8px;
@@ -389,15 +400,17 @@ section.section {
   margin-bottom: 12px;
   letter-spacing: 0.3px;
 }
-/* §2 / §4 grids both render 4 panels — show as 2×2, capped width so the
- * tiles don't dominate the page on wide displays. */
+/* §2 / §4 grids render 4 panels as 2×2. Cap the width and use the same
+ * gap as the §3 2×3 grid so each tile ends up the same size on desktop:
+ * 2×3 tile = (section_inner − 2·10) / 3 ≈ 385 px;
+ * 2×2 tile = (770 − 10) / 2 = 380 px (within 1.5 % of the 2×3 tile). */
 .baseline-grid,
 .sparsity-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 10px;
   margin: 0 auto 16px;
-  max-width: 880px;
+  max-width: 770px;
 }
 @media (max-width: 600px) {
   .baseline-grid,
