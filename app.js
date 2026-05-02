@@ -24,9 +24,9 @@ const BASELINE_SCENES = [
   { id: "scene075_cam2", label: "Scene 075 · cam 2", note: "paper anchor (s75_c2, ratio 0.01)" },
   { id: "scene076_cam3", label: "Scene 076 · cam 3", note: "paper anchor (s76_c3, ratio 0.01)" },
   { id: "scene090_cam3", label: "Scene 090 · cam 3", note: "ratio 0.1 · gain +4.87 PSNR"       },
-  { id: "scene046_cam0", label: "Scene 046 · cam 0", note: "ratio 0.1 · gain +3.80 PSNR"       },
   { id: "scene085_cam0", label: "Scene 085 · cam 0", note: "ratio 0.1 · gain +3.12 PSNR"       },
   { id: "scene129_cam0", label: "Scene 129 · cam 0", note: "ratio 0.1 · gain +2.70 PSNR"       },
+  { id: "scene126_cam0", label: "Scene 126 · cam 0", note: "ratio 0.1 · gain +2.26 PSNR"       },
 ];
 
 /* ---- §3 ablation ---- */
@@ -35,16 +35,16 @@ const ABLATION_SCENES = [
   { id: "scene169_cam4", label: "Scene 169 · cam 4", note: "paper anchor (s169_c4)"         },
 ];
 
-/* ---- §4 sparsity ---- */
+/* ---- §4 sparsity (sorted: largest avg PSNR gap over StreetCrafter* first) ---- */
 const SPARSITY_SCENES = [
-  { id: "scene013_cam0", label: "Scene 013 · cam 0" },
-  { id: "scene054_cam2", label: "Scene 054 · cam 2" },
-  { id: "scene105_cam0", label: "Scene 105 · cam 0" },
-  { id: "scene107_cam0", label: "Scene 107 · cam 0" },
-  { id: "scene136_cam1", label: "Scene 136 · cam 1" },
-  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
-  { id: "scene156_cam1", label: "Scene 156 · cam 1" },
-  { id: "scene173_cam2", label: "Scene 173 · cam 2" },
+  { id: "scene173_cam2", label: "Scene 173 · cam 2" },  // gap_avg 2.74
+  { id: "scene156_cam1", label: "Scene 156 · cam 1" },  // gap_avg 2.26
+  { id: "scene054_cam2", label: "Scene 054 · cam 2" },  // gap_avg 2.03
+  { id: "scene137_cam0", label: "Scene 137 · cam 0" },  // gap_avg 2.03
+  { id: "scene107_cam0", label: "Scene 107 · cam 0" },  // gap_avg 1.84
+  { id: "scene136_cam1", label: "Scene 136 · cam 1" },  // gap_avg 1.84
+  { id: "scene013_cam0", label: "Scene 013 · cam 0" },  // gap_avg 1.46
+  { id: "scene105_cam0", label: "Scene 105 · cam 0" },  // gap_avg 1.44
 ];
 const RATIOS = ["0.001", "0.01", "0.1", "1"];
 
@@ -200,8 +200,8 @@ function buildAblation() {
     grid.appendChild(makeStaticCard({ src: `${dir}/lidar.mp4`,    label: "LiDAR Input", lidar: true }));
     grid.appendChild(makeStaticCard({ src: `${dir}/gt.mp4`,       label: "Ground Truth" }));
     grid.appendChild(makeStaticCard({ src: `${dir}/full.mp4`,     label: "StreetNVS Full", ours: true }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/o LiDAR" }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/o Camera" }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/ Camera Only" }));
+    grid.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/ Projection Only" }));
     grid.appendChild(makeStaticCard({ src: `${dir}/no_ref.mp4`,   label: "Ours w/o Reference" }));
     root.appendChild(block);
   }
