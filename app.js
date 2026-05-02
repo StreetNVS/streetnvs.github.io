@@ -224,35 +224,58 @@ function buildSparsity() {
   // align the slider with the default ratio (0.1 is index 2 in RATIOS)
   slider.value = String(RATIOS.indexOf(curRatio));
 
-  // swap a video's source while preserving the current playback time, so the
-  // density toggle doesn't visually restart the clip.
-  function swapSrcKeepTime(video, newSrc) {
-    if (video.getAttribute("src") === newSrc) return;
-    const t = isFinite(video.currentTime) ? video.currentTime : 0;
+  // vOurs is the master clock; the others are kept aligned to it. This avoids
+  // drift from independent autoplay and from per-video swap timings.
+  const FOLLOWERS = [vGT, vLid];
+  const SYNC_TOL  = 0.15;   // seconds — drift threshold before we resync
+
+  function seekTo(video, t) {
+    const dur = isFinite(video.duration) && video.duration > 0 ? video.duration : null;
+    video.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
+  }
+
+  // swap a video's source and seek it to `t` once metadata is ready.
+  function swapAndSeek(video, newSrc, t) {
+    if (video.getAttribute("src") === newSrc) return false;
     const wasPaused = video.paused;
-    const resume = () => {
-      const dur = isFinite(video.duration) && video.duration > 0 ? video.duration : null;
-      video.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
+    const onReady = () => {
+      seekTo(video, t);
       if (!wasPaused) video.play().catch(() => {});
     };
-    video.addEventListener("loadedmetadata", resume, { once: true });
+    video.addEventListener("loadedmetadata", onReady, { once: true });
     video.src = newSrc;
+    return true;
   }
 
   function applyState() {
     const dir = `assets/sparsity/${curScene}`;
-    // GT does not depend on ratio — only swap on scene change.
+    // Capture master time *once* and replay every panel from the same offset.
+    const t = isFinite(vOurs.currentTime) ? vOurs.currentTime : 0;
+
+    // GT only depends on scene, but if scene changed we still want it on the
+    // master clock; if scene didn't change, the timeupdate sync below covers it.
     if (vGT.dataset.scene !== curScene) {
       vGT.dataset.scene = curScene;
-      swapSrcKeepTime(vGT, `${dir}/gt.mp4`);
+      swapAndSeek(vGT, `${dir}/gt.mp4`, t);
     }
-    // ratio-dependent panels: preserve currentTime across the toggle.
-    swapSrcKeepTime(vLid,  `${dir}/lidar/${curRatio}.mp4`);
-    swapSrcKeepTime(vOurs, `${dir}/ours/${curRatio}.mp4`);
+    swapAndSeek(vLid,  `${dir}/lidar/${curRatio}.mp4`, t);
+    swapAndSeek(vOurs, `${dir}/ours/${curRatio}.mp4`,  t);
 
     valLbl.textContent = curRatio;
     tickEls.forEach((el, i) => el.classList.toggle("active", RATIOS[i] === curRatio));
   }
+
+  // Re-align followers to the master a few times per second. Using timeupdate
+  // (fires ~4×/s during playback) handles loop boundaries cleanly: when the
+  // master loops to 0, the followers exceed SYNC_TOL and snap back too.
+  vOurs.addEventListener("timeupdate", () => {
+    const t = vOurs.currentTime;
+    if (!isFinite(t)) return;
+    for (const v of FOLLOWERS) {
+      if (!isFinite(v.duration) || v.duration <= 0) continue;
+      if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
+    }
+  });
 
   // scene buttons
   for (const [i, scene] of SPARSITY_SCENES.entries()) {
