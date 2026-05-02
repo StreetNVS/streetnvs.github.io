@@ -50,11 +50,13 @@ const RATIOS = ["0.001", "0.01", "0.1", "1"];
 /* =================================================================== */
 function makeSwipeCard({ topSrc, bottomSrc, label, ours = false, hint = "drag to reveal LiDAR" }) {
   // top = generated RGB, bottom = LiDAR conditioning.
-  // swipe handle controls how much of the top is clipped from the right.
+  // swipe handle controls how much of the top is clipped from the right —
+  // default position is at the far right, so the panel shows full RGB and
+  // the user drags leftward to reveal the LiDAR underneath.
   const card = document.createElement("div");
   card.className = "video-card swipe";
-  card.style.setProperty("--swipe-pos", "70%");
-  card.style.setProperty("--swipe-right", "30%");
+  card.style.setProperty("--swipe-pos", "100%");
+  card.style.setProperty("--swipe-right", "0%");
 
   card.innerHTML = `
     <video class="bottom" src="${bottomSrc}" autoplay loop muted playsinline></video>
@@ -131,15 +133,18 @@ function buildNovel() {
       label:     traj.label,
     });
     grid.appendChild(c.card);
-    return { traj, top: c.top, bottom: c.bottom };
+    return { traj, card: c.card, top: c.top, bottom: c.bottom };
   });
 
-  // Scene change always resets to t=0; pause state is preserved by swapAndSeek.
+  // Scene change always resets to t=0 and snaps the swipe back to the right
+  // edge (full-RGB view). Pause state is preserved by swapAndSeek.
   function applyState() {
-    for (const { traj, top, bottom } of cards) {
+    for (const { traj, card, top, bottom } of cards) {
       const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
       swapAndSeek(top,    `${dir}/gen.mp4`,  0);
       swapAndSeek(bottom, `${dir}/cond.mp4`, 0);
+      card.style.setProperty("--swipe-pos",   "100%");
+      card.style.setProperty("--swipe-right", "0%");
     }
     noteEl.textContent = `${curScene.label} — ${curScene.note}`;
   }
