@@ -370,14 +370,14 @@ section.section {
   .compare-block .row.row-3 { grid-template-columns: 1fr; }
 }
 
-/* ablation: tighter 2x3 grid keeps each tile small */
-.ablation-block .grid-2x3 {
+/* ablation: 3-column 2-row grid (Lidar | GT | Full / w-cam | w-proj | w/o-ref) */
+.grid-2x3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 @media (max-width: 700px) {
-  .ablation-block .grid-2x3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-2x3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 

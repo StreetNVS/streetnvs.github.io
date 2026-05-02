@@ -271,29 +271,70 @@ function buildBaselines() {
 /* §3 — ablation                                                       */
 /* =================================================================== */
 function buildAblation() {
-  const root = document.getElementById("ablation-blocks");
-  for (const scene of ABLATION_SCENES) {
-    const dir = `assets/ablation/${scene.id}`;
-    const block = document.createElement("div");
-    block.className = "scene-block ablation-block";
-    block.innerHTML = `
-      <div class="scene-block-header">
-        <h3>${scene.label}</h3>
-        <span class="tag">${scene.note}</span>
-      </div>
-      <div class="grid-2x3"></div>
-    `;
-    const grid = block.querySelector(".grid-2x3");
-    // Top row: inputs + full result. Bottom row: three ablations.
-    grid.appendChild(makeStaticCard({ src: `${dir}/lidar.mp4`,    label: "LiDAR Input", lidar: true }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/gt.mp4`,       label: "Ground Truth" }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/full.mp4`,     label: "StreetNVS Full", ours: true }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/no_lidar.mp4`, label: "Ours w/ Camera Only" }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/no_cam.mp4`,   label: "Ours w/ Projection Only" }));
-    grid.appendChild(makeStaticCard({ src: `${dir}/no_ref.mp4`,   label: "Ours w/o Reference" }));
-    attachBlockToggle(block);
-    root.appendChild(block);
+  const sceneBtns = document.getElementById("ablation-scene-buttons");
+  const noteEl    = document.getElementById("ablation-note");
+
+  const vLid   = document.getElementById("abl-lidar");
+  const vGT    = document.getElementById("abl-gt");
+  const vFull  = document.getElementById("abl-full");
+  const vNoLid = document.getElementById("abl-no-lidar");
+  const vNoCam = document.getElementById("abl-no-cam");
+  const vNoRef = document.getElementById("abl-no-ref");
+
+  let curScene = ABLATION_SCENES[0];
+
+  // vFull is the master clock; everyone else follows.
+  const FOLLOWERS = [vLid, vGT, vNoLid, vNoCam, vNoRef];
+  const SYNC_TOL  = 0.15;
+  function seekTo(v, t) {
+    const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : null;
+    v.currentTime = dur ? Math.min(t, Math.max(dur - 0.05, 0)) : t;
   }
+  function swapAndSeek(v, newSrc, t) {
+    if (v.getAttribute("src") === newSrc) return;
+    const wasPaused = v.paused;
+    v.addEventListener("loadedmetadata", () => {
+      seekTo(v, t);
+      if (!wasPaused) v.play().catch(() => {});
+    }, { once: true });
+    v.src = newSrc;
+  }
+
+  function applyState() {
+    const dir = `assets/ablation/${curScene.id}`;
+    const t = isFinite(vFull.currentTime) ? vFull.currentTime : 0;
+    swapAndSeek(vLid,   `${dir}/lidar.mp4`,    t);
+    swapAndSeek(vGT,    `${dir}/gt.mp4`,       t);
+    swapAndSeek(vFull,  `${dir}/full.mp4`,     t);
+    swapAndSeek(vNoLid, `${dir}/no_lidar.mp4`, t);
+    swapAndSeek(vNoCam, `${dir}/no_cam.mp4`,   t);
+    swapAndSeek(vNoRef, `${dir}/no_ref.mp4`,   t);
+    noteEl.textContent = `${curScene.label} — ${curScene.note}`;
+  }
+
+  vFull.addEventListener("timeupdate", () => {
+    const t = vFull.currentTime;
+    if (!isFinite(t)) return;
+    for (const v of FOLLOWERS) {
+      if (!isFinite(v.duration) || v.duration <= 0) continue;
+      if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
+    }
+  });
+
+  for (const [i, scene] of ABLATION_SCENES.entries()) {
+    const b = document.createElement("button");
+    b.textContent = scene.label;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => {
+      [...sceneBtns.children].forEach((c) => c.classList.remove("active"));
+      b.classList.add("active");
+      curScene = scene;
+      applyState();
+    });
+    sceneBtns.appendChild(b);
+  }
+
+  applyState();
 }
 
 /* =================================================================== */
