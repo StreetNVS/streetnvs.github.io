@@ -389,17 +389,19 @@ section.section {
   margin-bottom: 12px;
   letter-spacing: 0.3px;
 }
-/* §2 / §4 grids both render 4 panels — show as 2×2 so each tile is larger. */
+/* §2 / §4 grids both render 4 panels — show as 2×2, capped width so the
+ * tiles don't dominate the page on wide displays. */
 .baseline-grid,
 .sparsity-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
+  max-width: 880px;
 }
 @media (max-width: 600px) {
   .baseline-grid,
-  .sparsity-grid { grid-template-columns: 1fr; }
+  .sparsity-grid { grid-template-columns: 1fr; max-width: none; }
 }
 
 /* ---------- section 4 sparsity ---------- */
