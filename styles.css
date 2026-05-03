@@ -355,16 +355,41 @@ section.section {
 .video-card.swipe .swipe-side.right { right: 8px; color: #fff; }
 
 
-/* ---------- section 1 layout: 2×2 trajectory tiles, sized to match §4 ---------- */
-.novel-grid {
+/* ---------- section 1 layout: input on the left, 2×2 trajectory tiles ----------
+ * Input card spans both rows; tile size matches §4's 2×3 grid (~385 px).
+ */
+.novel-layout {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: 1fr;
   gap: 10px;
   margin: 0 auto 16px;
-  max-width: 780px;       /* 2 × 385 + 10 gap → tile matches §4 grid-2x3 tile */
+  max-width: 1170px;       /* 3 × 385 + 2 × 10 gap = 1175 ≈ 1170 */
 }
-@media (max-width: 600px) {
-  .novel-grid { grid-template-columns: 1fr; max-width: none; }
+.novel-input-card {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+  align-self: stretch;
+}
+.novel-grid {
+  grid-column: 2 / 4;
+  grid-row: 1 / 3;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .novel-layout {
+    grid-template-columns: 1fr;
+    max-width: 780px;
+  }
+  .novel-input-card {
+    grid-column: 1;
+    grid-row: auto;
+    aspect-ratio: 16 / 9;
+  }
+  .novel-grid { grid-column: 1; grid-row: auto; }
 }
 
 /* ---------- section 2/3 layout: 2-3-3 grid ---------- */

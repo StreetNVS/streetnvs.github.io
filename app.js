@@ -30,18 +30,17 @@ const BASELINE_SCENES = [
 
 /* ---- §4 ablation ---- */
 const ABLATION_SCENES = [
-  { id: "scene072_cam2", label: "Scene 072 · cam 2" },
   { id: "scene000_cam2", label: "Scene 000 · cam 2" },
   { id: "scene169_cam4", label: "Scene 169 · cam 4" },
+  { id: "scene072_cam2", label: "Scene 072 · cam 2" },
 ];
 
-/* ---- sparsity (cam-0 trio first, then two side-camera cases) ---- */
+/* ---- §3 sparsity ---- */
 const SPARSITY_SCENES = [
-  { id: "scene162_cam0", label: "Scene 162 · cam 0" },
-  { id: "scene121_cam0", label: "Scene 121 · cam 0" },
-  { id: "scene137_cam0", label: "Scene 137 · cam 0" },
   { id: "scene187_cam2", label: "Scene 187 · cam 2" },
   { id: "scene030_cam3", label: "Scene 030 · cam 3" },
+  { id: "scene162_cam0", label: "Scene 162 · cam 0" },
+  { id: "scene121_cam0", label: "Scene 121 · cam 0" },
 ];
 const RATIOS = ["0.001", "0.01", "0.1", "1"];
 
@@ -120,8 +119,12 @@ function buildNovel() {
   const grid      = document.getElementById("novel-grid");
   const sceneBtns = document.getElementById("novel-scene-buttons");
   const noteEl    = document.getElementById("novel-note");
+  const vInput    = document.getElementById("novel-input");
 
   let curScene = NOVEL_SCENES[0];
+  // Initial input.mp4 (browser autoplays once src is set in HTML; we load it
+  // here so the helper applyEndDelay() picks it up uniformly).
+  vInput.src = `assets/novel_view/${curScene.id}/input.mp4`;
 
   // Build the four trajectory cards once and remember each pair of videos so
   // we can swap their srcs in place when the user picks a different scene.
@@ -139,6 +142,7 @@ function buildNovel() {
   // Scene change always resets to t=0 and snaps the swipe back to the right
   // edge (full-RGB view). Pause state is preserved by swapAndSeek.
   function applyState() {
+    swapAndSeek(vInput, `assets/novel_view/${curScene.id}/input.mp4`, 0);
     for (const { traj, card, top, bottom } of cards) {
       const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
       swapAndSeek(top,    `${dir}/gen.mp4`,  0);
@@ -497,10 +501,32 @@ function wireSectionToggles() {
   });
 }
 
+// Add a delay-and-restart loop to every <video>: when the clip ends, hold the
+// last frame for `delayMs`, then rewind to 0 and play. We can't keep the
+// native `loop` attribute and still get an 'ended' event, so the helper
+// strips loop and emulates it manually. Honors the section pause toggle.
+function applyEndDelay(delayMs = 1000) {
+  document.querySelectorAll("video").forEach((v) => {
+    if (v.dataset.endDelay) return;          // already wired
+    v.dataset.endDelay = "1";
+    v.loop = false;
+    v.removeAttribute("loop");
+    v.addEventListener("ended", () => {
+      setTimeout(() => {
+        // Skip the restart if the user has paused the section in the meantime.
+        if (sectionPaused(v.closest("section"))) return;
+        seekTo(v, 0);
+        v.play().catch(() => {});
+      }, delayMs);
+    });
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   buildNovel();
   buildBaselines();
   buildAblation();
   buildSparsity();
   wireSectionToggles();
+  applyEndDelay(1000);                       // 1-second pause-then-restart on each clip
 });

@@ -43,17 +43,16 @@ NOVEL_SCENES   = ["s10", "s2", "s5", "s11", "s15"]
 TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
 ABLATION_SCENES = [
     # (sample_id, scene_dir, note) — display order matches this list
-    ("waymo_000362_s72_c2",  "scene072_cam2", ""),
     ("waymo_000002_s0_c2",   "scene000_cam2", "anchor"),
     ("waymo_000849_s169_c4", "scene169_cam4", ""),
+    ("waymo_000362_s72_c2",  "scene072_cam2", ""),
 ]
 SPARSITY_SCENES = [
     # (scene_dir, sample_id) — ordered as the website should display them.
+    ("scene187_cam2", "waymo_000937_s187_c2"),
+    ("scene030_cam3", "waymo_000153_s30_c3"),
     ("scene162_cam0", "waymo_000810_s162_c0"),
     ("scene121_cam0", "waymo_000605_s121_c0"),
-    ("scene137_cam0", "waymo_000685_s137_c0"),
-    ("scene187_cam2", "waymo_000937_s187_c2"),  # side; sparse_gap +4.40
-    ("scene030_cam3", "waymo_000153_s30_c3"),   # side; sparse_gap +4.32
 ]
 SPARSITY_RATIOS = ["0.001", "0.01", "0.1", "1"]
 PAPER_BASELINES = ["scene075_cam2", "scene076_cam3"]   # at ratio 0.01
@@ -108,7 +107,8 @@ def main():
     # ---- §1 novel view --------------------------------------------------
     print("== novel_view ==")
     for scene in NOVEL_SCENES:
-        out_dir = ASSETS / "novel_view" / f"scene{int(scene[1:]):03d}"
+        sid_n   = int(scene[1:])
+        out_dir = ASSETS / "novel_view" / f"scene{sid_n:03d}"
         for traj in TRAJS:
             match = sorted(NV_RUN.glob(f"sample_*_{scene}_c{traj}_generated.mp4"))
             if not match:
@@ -118,6 +118,12 @@ def main():
             cond = gen.with_name(gen.name.replace("_generated.mp4", "_cond.mp4"))
             install(gen,  out_dir / traj / "gen.mp4",  MODE)
             install(cond, out_dir / traj / "cond.mp4", MODE)
+        # Per-scene 'input' clip — encoded once from the source streetcrafter
+        # frames (camera 0, frames 0–80). Skip if already on disk.
+        input_mp4 = out_dir / "input.mp4"
+        if not input_mp4.exists():
+            print(f"  ! {scene}/input.mp4 missing — encode with the helper "
+                  f"described in the file header.")
 
     # ---- §2 baselines ---------------------------------------------------
     print("== baselines ==")
