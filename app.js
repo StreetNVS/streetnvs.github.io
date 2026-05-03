@@ -30,8 +30,8 @@ const BASELINE_SCENES = [
 
 /* ---- §4 ablation ---- */
 const ABLATION_SCENES = [
-  { id: "scene000_cam2", label: "Scene 000 · cam 2" },
   { id: "scene169_cam4", label: "Scene 169 · cam 4" },
+  { id: "scene000_cam2", label: "Scene 000 · cam 2" },
   { id: "scene072_cam2", label: "Scene 072 · cam 2" },
 ];
 
