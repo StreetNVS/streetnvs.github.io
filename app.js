@@ -500,6 +500,35 @@ function wireSectionToggles() {
   });
 }
 
+// Per-section loop coordinator: when any video in the section reaches its
+// end, pause all videos in that section, wait `delayMs`, then seek every
+// video back to 0 and play them together. Keeps the whole grid in sync at
+// every loop boundary instead of letting per-video drift accumulate.
+function wireLoopCoordinator(sectionEl, delayMs = 500) {
+  let pending = null;
+  const onEnded = () => {
+    if (pending) return;                                    // already scheduled
+    sectionEl.querySelectorAll("video").forEach((v) => v.pause());
+    pending = setTimeout(() => {
+      pending = null;
+      if (sectionPaused(sectionEl)) return;                 // user paused → stay
+      sectionEl.querySelectorAll("video").forEach((v) => {
+        seekTo(v, 0);
+        v.play().catch(() => {});
+      });
+    }, delayMs);
+  };
+  sectionEl.querySelectorAll("video").forEach((v) => {
+    v.loop = false;                                         // need 'ended' to fire
+    v.removeAttribute("loop");
+    v.addEventListener("ended", onEnded);
+  });
+}
+
+function wireAllLoopCoordinators() {
+  document.querySelectorAll("section.section").forEach((s) => wireLoopCoordinator(s, 500));
+}
+
 // Pause off-screen sections so we're not decoding ~20+ videos simultaneously
 // when only one is visible. Honors the user's section pause toggle.
 function wireVisibilityPausing() {
@@ -533,5 +562,6 @@ window.addEventListener("DOMContentLoaded", () => {
   buildSparsity();
   wireSectionToggles();
   softenPreload();
+  wireAllLoopCoordinators();
   wireVisibilityPausing();
 });
