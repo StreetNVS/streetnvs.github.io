@@ -401,8 +401,7 @@ function buildSparsity() {
   const vOurs   = document.getElementById("spa-ours");
 
   let curScene = SPARSITY_SCENES[0].id;
-  let curRatio = "0.1";   // default — middle of meaningful range
-  // align the slider with the default ratio (0.1 is index 2 in RATIOS)
+  let curRatio = "0.001";                   // default — sparsest setting
   slider.value = String(RATIOS.indexOf(curRatio));
 
   // vOurs is the master clock; the others are kept aligned to it. This avoids
