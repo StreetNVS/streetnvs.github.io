@@ -526,7 +526,7 @@ function wireLoopCoordinator(sectionEl, delayMs = 500) {
 }
 
 function wireAllLoopCoordinators() {
-  document.querySelectorAll("section.section").forEach((s) => wireLoopCoordinator(s, 500));
+  document.querySelectorAll("section.section").forEach((s) => wireLoopCoordinator(s, 1000));
 }
 
 // Pause off-screen sections so we're not decoding ~20+ videos simultaneously
