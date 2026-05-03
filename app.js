@@ -501,24 +501,29 @@ function wireSectionToggles() {
   });
 }
 
-// Add a delay-and-restart loop to every <video>: when the clip ends, hold the
-// last frame for `delayMs`, then rewind to 0 and play. We can't keep the
-// native `loop` attribute and still get an 'ended' event, so the helper
-// strips loop and emulates it manually. Honors the section pause toggle.
-function applyEndDelay(delayMs = 1000) {
+// Pause off-screen sections so we're not decoding ~20+ videos simultaneously
+// when only one is visible. Honors the user's section pause toggle.
+function wireVisibilityPausing() {
+  const obs = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const section = e.target;
+      const userPaused = sectionPaused(section);
+      const videos = section.querySelectorAll("video");
+      if (e.isIntersecting && !userPaused) {
+        videos.forEach((v) => v.play().catch(() => {}));
+      } else if (!e.isIntersecting) {
+        videos.forEach((v) => v.pause());
+      }
+    }
+  }, { threshold: 0.05 });
+  document.querySelectorAll("section.section").forEach((s) => obs.observe(s));
+}
+
+// Lighter initial fetch: metadata only. autoplay still kicks playback in
+// once the section becomes visible and the IntersectionObserver clears it.
+function softenPreload() {
   document.querySelectorAll("video").forEach((v) => {
-    if (v.dataset.endDelay) return;          // already wired
-    v.dataset.endDelay = "1";
-    v.loop = false;
-    v.removeAttribute("loop");
-    v.addEventListener("ended", () => {
-      setTimeout(() => {
-        // Skip the restart if the user has paused the section in the meantime.
-        if (sectionPaused(v.closest("section"))) return;
-        seekTo(v, 0);
-        v.play().catch(() => {});
-      }, delayMs);
-    });
+    if (!v.hasAttribute("preload")) v.setAttribute("preload", "metadata");
   });
 }
 
@@ -528,5 +533,6 @@ window.addEventListener("DOMContentLoaded", () => {
   buildAblation();
   buildSparsity();
   wireSectionToggles();
-  applyEndDelay(1000);                       // 1-second pause-then-restart on each clip
+  softenPreload();
+  wireVisibilityPausing();
 });

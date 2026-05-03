@@ -369,7 +369,8 @@ section.section {
 .novel-input-card {
   grid-column: 1 / 2;
   grid-row: 1 / 3;
-  align-self: stretch;
+  align-self: center;     /* don't stretch — let aspect-ratio pick the height */
+  width: 100%;
 }
 .novel-grid {
   grid-column: 2 / 4;
