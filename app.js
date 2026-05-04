@@ -472,6 +472,62 @@ function buildSparsity() {
 }
 
 /* =================================================================== */
+/* §5 — novel-view comparison vs. baseline                             */
+/* =================================================================== */
+const NVC_CLIPS = [
+  { id: "clip015_s3_rotate",   label: "Scene 003 · Rotation",  note: "rotation trajectory" },
+  { id: "clip044_s11_elevate", label: "Scene 011 · Elevation", note: "elevation (BEV-like) trajectory" },
+  { id: "clip089_s22_spiral",  label: "Scene 022 · Spiral",    note: "spiral trajectory" },
+];
+
+function buildNovelCompare() {
+  const sceneBtns = document.getElementById("nvc-scene-buttons");
+  const noteEl    = document.getElementById("nvc-note");
+  const vIn       = document.getElementById("nvc-input");
+  const vSCS      = document.getElementById("nvc-scstar");
+  const vOurs     = document.getElementById("nvc-ours");
+
+  let curClip = NVC_CLIPS[0];
+
+  const FOLLOWERS = [vIn, vSCS];
+  const SYNC_TOL  = 0.15;
+
+  function applyState() {
+    const dir = `assets/novel_view_comparison/${curClip.id}`;
+    swapAndSeek(vIn,   `${dir}/input.mp4`,   0);
+    swapAndSeek(vSCS,  `${dir}/sc_star.mp4`, 0);
+    swapAndSeek(vOurs, `${dir}/ours.mp4`,    0);
+    noteEl.textContent = curClip.note ? `${curClip.label} — ${curClip.note}` : curClip.label;
+  }
+
+  vOurs.addEventListener("timeupdate", () => {
+    if (vOurs.dataset.swapping) return;
+    const t = vOurs.currentTime;
+    if (!isFinite(t)) return;
+    for (const v of FOLLOWERS) {
+      if (v.dataset.swapping) continue;
+      if (!isFinite(v.duration) || v.duration <= 0) continue;
+      if (Math.abs(v.currentTime - t) > SYNC_TOL) seekTo(v, t);
+    }
+  });
+
+  for (const [i, clip] of NVC_CLIPS.entries()) {
+    const b = document.createElement("button");
+    b.textContent = clip.label;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => {
+      [...sceneBtns.children].forEach((c) => c.classList.remove("active"));
+      b.classList.add("active");
+      curClip = clip;
+      applyState();
+    });
+    sceneBtns.appendChild(b);
+  }
+
+  applyState();
+}
+
+/* =================================================================== */
 /* Per-section play/pause toggle                                       */
 /* =================================================================== */
 function wireSectionToggles() {
@@ -561,6 +617,7 @@ window.addEventListener("DOMContentLoaded", () => {
   buildBaselines();
   buildAblation();
   buildSparsity();
+  buildNovelCompare();
   wireSectionToggles();
   softenPreload();
   wireAllLoopCoordinators();

@@ -16,6 +16,7 @@
       <a href="#baselines">Comparison vs. Baselines</a>
       <a href="#sparsity">LiDAR Sparsity</a>
       <a href="#ablation">Ablation</a>
+      <a href="#novel-compare">Novel View vs. Baseline</a>
     </div>
   </div>
 </nav>
@@ -226,6 +227,51 @@
     <div class="video-card">
       <span class="label">Ours w/o Reference</span>
       <video id="abl-no-ref" autoplay loop muted playsinline></video>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================== -->
+<!-- §5 Novel-view comparison vs. baseline -->
+<!-- =============================================================== -->
+<section id="novel-compare" class="section">
+  <div class="section-head">
+    <button class="section-toggle" data-state="playing" aria-label="Pause all videos in this section">
+      <span class="icon">❚❚</span><span class="text">Pause</span>
+    </button>
+    <div class="section-eyebrow">§5 · Novel-view comparison vs. baseline</div>
+    <h2>More coherent, more geometry-accurate</h2>
+    <p>
+      Under extreme trajectory shifts the LiDAR-aware baseline
+      (<em>StreetCrafter*</em>) drifts: scene structure warps, surfaces tear,
+      and identity wanders frame to frame. StreetNVS's geometry-grounded
+      conditioning keeps the scene rigid — the same buildings, lanes, and
+      vehicles appear in the right places throughout the clip — yielding
+      sharper appearance and noticeably better cross-frame coherence.
+      Pick any clip below to see the source ego-camera input next to
+      both methods' renderings.
+    </p>
+  </div>
+
+  <div class="sparsity-controls baseline-controls">
+    <label>Clip</label>
+    <div class="scene-buttons" id="nvc-scene-buttons"></div>
+  </div>
+
+  <div id="nvc-note" class="baseline-note"></div>
+
+  <div class="sparsity-grid nvc-grid">
+    <div class="video-card">
+      <span class="label">Input (ego-camera)</span>
+      <video id="nvc-input" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label">StreetCrafter*</span>
+      <video id="nvc-scstar" autoplay loop muted playsinline></video>
+    </div>
+    <div class="video-card">
+      <span class="label ours">StreetNVS (Ours)</span>
+      <video id="nvc-ours" autoplay loop muted playsinline></video>
     </div>
   </div>
 </section>
