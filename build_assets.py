@@ -39,7 +39,7 @@ ASSETS = ROOT / "assets"
 OURS_SUBDIR = "GeoI2VLoRA_waymo_multi_vace_UCPE_addref_frameidv3_stronglora_vacedepth_encodevacemask_bettercam"
 SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encodevacemask_novacemask_bettercam"
 
-NOVEL_SCENES   = ["s10", "s2", "s5", "s11", "s15"]
+NOVEL_SCENES   = ["s10", "s3", "s16", "s11", "s2", "s5", "s15"]
 TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
 ABLATION_SCENES = [
     # (sample_id, scene_dir, note) — display order matches this list
