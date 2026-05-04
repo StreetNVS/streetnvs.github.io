@@ -8,7 +8,6 @@
 const NOVEL_SCENES = [
   { id: "scene010", label: "Scene 010" },
   { id: "scene003", label: "Scene 003" },
-  { id: "scene016", label: "Scene 016" },
   { id: "scene011", label: "Scene 011" },
   { id: "scene002", label: "Scene 002" },
   { id: "scene005", label: "Scene 005" },
