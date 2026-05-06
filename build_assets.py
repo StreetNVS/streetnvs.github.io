@@ -34,7 +34,7 @@ import shutil
 from pathlib import Path
 
 ROOT   = Path(__file__).resolve().parent
-ASSETS = ROOT / "assets"
+ASSETS = ROOT / "website" / "assets"
 
 OURS_SUBDIR = "GeoI2VLoRA_waymo_multi_vace_UCPE_addref_frameidv3_stronglora_vacedepth_encodevacemask_bettercam"
 SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encodevacemask_novacemask_bettercam"
