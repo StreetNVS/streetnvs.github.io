@@ -279,7 +279,7 @@ function buildBaselines() {
   const vOurs = document.getElementById("bsl-ours");
 
   let curScene  = BASELINE_SCENES[0];
-  let curMethod = "sc_star";   // strongest LiDAR-aware baseline by default
+  let curMethod = "freevs";    // default to FreeVS
 
   // Master-clock pattern: vOurs leads, the rest follow.
   const FOLLOWERS = [vGT, vLid, vBase];
