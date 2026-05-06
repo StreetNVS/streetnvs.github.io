@@ -13,11 +13,17 @@ const NOVEL_SCENES = [
   { id: "scene005", label: "Scene 005" },
   { id: "scene015", label: "Scene 015" },
 ];
+// Row-major fill order for the 2×4 grid in §1. Cell (1,1) is the input
+// video (built separately); these seven entries fill cells (1,2) → (2,4).
+// The two ``extreme`` flags steer the red label colour.
 const NOVEL_TRAJ_ORDER = [
-  { key: "elevate",    label: "Elevation"  },
-  { key: "lane_shift", label: "Lane Shift" },
-  { key: "barron",     label: "Spiral"     },
-  { key: "rotate",     label: "Rotation"   },
+  { key: "barron",             label: "Spiral"               },
+  { key: "lane_shift",         label: "Lane Shift"           },
+  { key: "lane_shift_extreme", label: "Extreme Lane Shift", extreme: true },
+  { key: "rotate",             label: "Rotation"             },
+  { key: "pullback",           label: "Pull-Back"            },
+  { key: "elevate",            label: "Elevation"            },
+  { key: "bev",                label: "Extreme Elevate",    extreme: true },
 ];
 
 /* ---- §2 baselines ---- */
@@ -127,8 +133,11 @@ function buildNovel() {
   // here so the helper applyEndDelay() picks it up uniformly).
   vInput.src = `assets/novel_view/${curScene.id}/input.mp4`;
 
-  // Build the four trajectory cards once and remember each pair of videos so
+  // Build the seven trajectory cards once and remember each pair of videos so
   // we can swap their srcs in place when the user picks a different scene.
+  // The input card already lives at cell (1,1) of the grid (rendered in HTML);
+  // these cards are appended after it and fill cells (1,2) → (2,4) in
+  // row-major order. Extreme trajectories carry a red 'extreme' label.
   const cards = NOVEL_TRAJ_ORDER.map((traj) => {
     const dir = `assets/novel_view/${curScene.id}/${traj.key}`;
     const c = makeSwipeCard({
@@ -136,6 +145,9 @@ function buildNovel() {
       bottomSrc: `${dir}/cond.mp4`,
       label:     traj.label,
     });
+    if (traj.extreme) {
+      c.card.querySelector(".label").classList.add("extreme");
+    }
     grid.appendChild(c.card);
     return { traj, card: c.card, top: c.top, bottom: c.bottom };
   });

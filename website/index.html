@@ -46,12 +46,17 @@
     <div class="section-eyebrow">§1 · Unseen novel view synthesis</div>
     <h2>Synthesizing trajectories far from the vehicle path</h2>
     <p>
-      Pick a scene below to render four camera trajectories that depart from
-      the original ego-trajectory: <em>Elevation</em> (BEV-like),
-      <em>Lane Shift</em> (sideways translation), <em>Spiral</em>
-      (orbital sweep around the source pose), and <em>Rotation</em> (yaw turn).
-      Drag the slider on any clip to wipe between the synthesized RGB output
-      (left) and its underlying LiDAR conditioning (right).
+      Pick a scene below to render five camera trajectories that depart from
+      the original ego-trajectory: <em>Spiral</em> (orbital sweep around the
+      source pose), <em>Lane Shift</em> (sideways translation), <em>Rotation</em>
+      (yaw turn), <em>Pull-Back</em> (dolly retreat along the forward axis),
+      and <em>Elevation</em> (BEV-like rise). We additionally demonstrate two
+      <span class="extreme-text">extreme</span> trajectories — wider lane-shift
+      and stronger top-down — that go well beyond the training distribution.
+      While quality drops a little under these extreme out-of-distribution
+      viewpoints, our method still maintains overall geometry consistency of
+      the scene. Drag the slider on any clip to wipe between the synthesized
+      RGB output (left) and its underlying LiDAR conditioning (right).
     </p>
   </div>
 
@@ -62,12 +67,11 @@
 
   <div id="novel-note" class="baseline-note"></div>
 
-  <div class="novel-layout">
+  <div id="novel-grid" class="novel-grid">
     <div class="video-card novel-input-card">
-      <span class="label">Input Video</span>
+      <span class="label ours">Input Video</span>
       <video id="novel-input" autoplay loop muted playsinline></video>
     </div>
-    <div id="novel-grid" class="novel-grid"></div>
   </div>
 </section>
 

@@ -40,7 +40,8 @@ OURS_SUBDIR = "GeoI2VLoRA_waymo_multi_vace_UCPE_addref_frameidv3_stronglora_vace
 SC_STAR_SUB = "GeoI2VLoRA_waymo_multi_vace_UCPE_noref_frameidv3_stronglora_encodevacemask_novacemask_bettercam"
 
 NOVEL_SCENES   = ["s10", "s3", "s11", "s2", "s5", "s15"]
-TRAJS          = ["barron", "elevate", "lane_shift", "rotate"]
+TRAJS          = ["barron", "elevate", "lane_shift", "rotate",
+                  "pullback", "lane_shift_extreme", "bev"]
 ABLATION_SCENES = [
     # (sample_id, scene_dir, note) — display order matches this list
     ("waymo_000002_s0_c2",   "scene000_cam2", "anchor"),
