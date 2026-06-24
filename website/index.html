@@ -26,12 +26,45 @@
     <span class="grad">StreetNVS</span>: Effective Multi-sensor Conditioning<br />
     for Street-view Novel-view Synthesis
   </h1>
+  <div class="authors">
+    <span class="author"><a href="https://zhengfeikuang.com/" target="_blank" rel="noopener">Zhengfei Kuang</a><sup>1</sup></span>
+    <span class="author"><a href="https://adamsunn.github.io/" target="_blank" rel="noopener">Adam Sun</a><sup>1</sup></span>
+    <span class="author"><a href="https://www.zhuliyuan.net/" target="_blank" rel="noopener">Liyuan Zhu</a><sup>1</sup></span>
+    <span class="author"><a href="https://wutong16.github.io/" target="_blank" rel="noopener">Tong Wu</a><sup>1</sup></span>
+    <span class="author"><a href="https://primecai.github.io/" target="_blank" rel="noopener">Shengqu Cai</a><sup>1</sup></span>
+    <span class="author"><a href="https://research.nvidia.com/person/jonathan-tremblay" target="_blank" rel="noopener">Jonathan Tremblay</a><sup>2</sup></span>
+    <span class="author"><a href="https://ir0.github.io/" target="_blank" rel="noopener">Iro Armeni</a><sup>1</sup></span>
+    <span class="author"><a href="https://stanford.edu/~eadeli/" target="_blank" rel="noopener">Ehsan Adeli</a><sup>1</sup></span>
+    <span class="author"><a href="https://lioryariv.github.io/" target="_blank" rel="noopener">Lior Yariv</a><sup>1</sup></span>
+    <span class="author"><a href="https://web.stanford.edu/~gordonwz/" target="_blank" rel="noopener">Gordon Wetzstein</a><sup>1</sup></span>
+  </div>
+  <div class="affiliations">
+    <span><sup>1</sup> Stanford University</span>
+    <span><sup>2</sup> NVIDIA</span>
+  </div>
   <p class="subtitle">
-    StreetNVS conditions a controllable video generation backbone on
-    LiDAR-grounded 3D anchors and relative camera poses, synthesizing novel
-    views from a vehicle's trajectory while preserving identity and
-    structure under extreme extrapolation — including bird's-eye,
-    lane-shifted, and rotated viewpoints.
+    Modern vehicle platforms are equipped with a rich sensor suite, including
+    LiDAR, calibrated multi-camera rigs, and accurate ego-motion, that in
+    principle offers strong signal for re-rendering a driving scene from novel
+    viewpoints. A growing line of recent work leverages video diffusion models
+    for this task, using their generative priors to synthesize plausible novel
+    views from sparse vehicle observations. In practice, however, existing
+    methods exploit only a fragment of this signal, and their quality tends to
+    degrade as the target trajectory departs from the recorded driving path.
+    We argue that this is fundamentally a multi-sensor fusion problem: sparse
+    LiDAR reprojections supply accurate but incomplete metric geometry,
+    surround-view reference imagery supplies dense appearance but no metric
+    depth, and camera poses tie the two together across views. We introduce
+    StreetNVS, a video diffusion framework that jointly conditions on all
+    three signals through a Reference-Enhanced Camera Attention module based
+    on a relative ray-level positional encoding. We develop a two-stage
+    curriculum training strategy that gradually exposes the model to
+    increasingly sparse LiDAR. On the Waymo Open Dataset, StreetNVS
+    substantially outperforms state-of-the-art baselines under sparse LiDAR
+    conditioning, matches methods that rely on 10–100× denser point clouds.
+    We further show capabilities of synthesizing coherent videos along extreme
+    out-of-trajectory paths such as elevation, lane-shift, pullback, and
+    rotation.
   </p>
   <div class="hero-links">
     <a class="hero-btn" href="https://arxiv.org/abs/2606.01590" target="_blank" rel="noopener">
