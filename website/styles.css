@@ -108,6 +108,48 @@ a:hover { text-decoration: underline; }
   gap: 12px;
   flex-wrap: wrap;
 }
+.hero-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--fg-1);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  box-shadow: 0 1px 2px rgba(15,20,40,0.05);
+  text-decoration: none;
+}
+.hero-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15,20,40,0.10);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.hero-btn .hero-btn-icon {
+  height: 18px;
+  width: 18px;
+  display: block;
+  color: var(--accent);
+  transition: color 0.15s ease;
+}
+.hero-btn-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 .pill {
   display: inline-flex;
   align-items: center;
